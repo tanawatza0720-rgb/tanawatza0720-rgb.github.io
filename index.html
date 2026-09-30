@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Amber Legend · ตำนานป่าอัมพร</title>
+<meta name="description" content="เกม 3D บนเว็บ เล่นฟรีบนมือถือและคอม: เลี้ยงมอนสเตอร์บนเกาะลอยฟ้า ฟักไข่ วิวัฒนาการ ต่อสู้ในดินแดน 4 เผ่า และบุกปล้นบ้านผู้เล่นอื่น">
+<meta property="og:title" content="Amber Legend · ตำนานป่าอัมพร">
+<meta property="og:description" content="เลี้ยงมอนสเตอร์บนเกาะลอยฟ้า ฟักไข่ ต่อสู้ และบุกปล้นบ้านเพื่อน — เล่นฟรีบนเว็บ">
+<meta property="og:image" content="https://amberlegend.com/hero.jpg">
+<meta property="og:url" content="https://amberlegend.com/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#1a120b">
+<link rel="icon" href="icon.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#1a120b;--card:#261a10;--line:rgba(255,200,120,.16);--text:#f6ead8;--muted:#c9b69a;--amber:#ffb347;--amber2:#ff8a2a;--green:#8fe08a}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:Kanit,system-ui,sans-serif;line-height:1.55}
+a{color:inherit}
+.wrap{max-width:1080px;margin:0 auto;padding:0 16px}
+header{position:sticky;top:0;z-index:5;background:rgba(26,18,11,.82);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+header .wrap{display:flex;align-items:center;justify-content:space-between;height:58px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.3px;text-decoration:none}
+.brand i{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--amber),var(--amber2));display:grid;place-items:center;font-style:normal;color:#2a1604;font-size:16px}
+.hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line)}
+.hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.55}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(26,18,11,.2) 0%,rgba(26,18,11,.55) 55%,var(--bg) 100%)}
+.hero .wrap{position:relative;z-index:1;padding:clamp(70px,14vw,150px) 16px clamp(48px,8vw,90px)}
+.tag{display:inline-block;padding:4px 12px;border-radius:99px;background:rgba(255,179,71,.14);border:1px solid rgba(255,179,71,.35);color:var(--amber);font-size:13px;font-weight:600}
+h1{font-size:clamp(34px,7vw,64px);line-height:1.1;margin:14px 0 10px;font-weight:800;text-shadow:0 4px 24px rgba(0,0,0,.6)}
+h1 small{display:block;font-size:.42em;color:var(--amber);font-weight:600;margin-top:8px;letter-spacing:1px}
+.lead{max-width:560px;font-size:clamp(15px,2.2vw,18px);color:#efe2cc;text-shadow:0 2px 12px rgba(0,0,0,.7)}
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:14px 26px;border-radius:14px;font-weight:800;font-size:17px;text-decoration:none;transition:transform .15s,box-shadow .15s}
+.btn.main{background:linear-gradient(180deg,var(--amber),var(--amber2));color:#2a1604;box-shadow:0 10px 30px rgba(255,138,42,.35)}
+.btn.main:hover{transform:translateY(-2px);box-shadow:0 14px 36px rgba(255,138,42,.45)}
+.btn.ghost{border:1px solid var(--line);background:rgba(0,0,0,.25);color:var(--text);font-weight:600}
+section{padding:56px 0}
+h2{font-size:clamp(22px,4vw,30px);margin:0 0 6px}
+.sub{color:var(--muted);margin:0 0 26px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.f{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+.f b{display:block;font-size:17px;margin:8px 0 4px}
+.f p{margin:0;color:var(--muted);font-size:14px}
+.f .ic{font-size:26px}
+.games{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.game{display:block;text-decoration:none;background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;transition:transform .15s,border-color .15s}
+.game:hover{transform:translateY(-3px);border-color:rgba(255,179,71,.5)}
+.game img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}
+.game .gb{padding:14px 16px 16px}
+.game .gb b{font-size:18px}
+.game .gb p{margin:4px 0 0;color:var(--muted);font-size:14px}
+.game .live{float:right;font-size:12px;color:var(--green);font-weight:600}
+.game.soon{display:grid;place-items:center;min-height:220px;color:var(--muted);border-style:dashed;text-align:center;padding:20px}
+.game.soon:hover{transform:none;border-color:var(--line)}
+footer{border-top:1px solid var(--line);padding:26px 0 40px;color:var(--muted);font-size:13px}
+footer .wrap{display:flex;flex-wrap:wrap;gap:10px 22px;justify-content:space-between}
+@media (prefers-reduced-motion:reduce){.btn,.game{transition:none}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <a class="brand" href="./"><i>✦</i>Amber Legend</a>
+  <a class="btn main" href="amber-land/" style="padding:8px 16px;font-size:14px">เล่นเลย</a>
+</div></header>
+
+<div class="hero">
+  <img src="hero.jpg" alt="" srcset="hero_sm.jpg 640w, hero.jpg 1280w" sizes="100vw">
+  <div class="wrap">
+    <span class="tag">เล่นฟรีบนเว็บ · มือถือ & คอม</span>
+    <h1>ตำนานป่าอัมพร<small>AMBER LAND</small></h1>
+    <p class="lead">เลี้ยงมอนสเตอร์บนเกาะลอยฟ้าของคุณเอง ฟักไข่ลุ้นระดับเทพเจ้า วิวัฒนาการ ออกผจญภัยในดินแดน 4 เผ่า และบุกปล้นบ้านผู้เล่นคนอื่น</p>
+    <div class="cta">
+      <a class="btn main" href="amber-land/">▶ เข้าเล่นตำนานป่าอัมพร</a>
+      <a class="btn ghost" href="#features">ดูว่ามีอะไรบ้าง</a>
+    </div>
+  </div>
+</div>
+
+<section id="features"><div class="wrap">
+  <h2>ในเกมมีอะไรบ้าง</h2>
+  <p class="sub">ไม่ต้องติดตั้ง เปิดเบราว์เซอร์แล้วเล่นได้ทันที</p>
+  <div class="grid">
+    <div class="f"><span class="ic">🏝️</span><b>เกาะลอยฟ้าของคุณ</b><p>ฟาร์มส่วนตัวที่มอนสเตอร์เดินเล่นอยู่จริง เก็บอัมพรจากต้นไม้ประจำเกาะ</p></div>
+    <div class="f"><span class="ic">🥚</span><b>ฟักไข่ 4 ระดับ</b><p>ทั่วไป หายาก ตำนาน และเทพเจ้า พร้อม 6 ธาตุที่แพ้ทางกัน</p></div>
+    <div class="f"><span class="ic">⚔️</span><b>ผจญภัยในดินแดน 4 เผ่า</b><p>มนุษย์ กึ่งมนุษย์ อันเดด และเทพ แต่ละดินแดนมีศัตรู บอส และสกิลของตัวเอง</p></div>
+    <div class="f"><span class="ic">👊</span><b>บุกปล้น & เอาคืน</b><p>ส่งทีมบุกบ้านเพื่อนหรือผู้เล่นสุ่ม ลุ้นได้ตัวละครของอีกฝ่ายกลับมา</p></div>
+    <div class="f"><span class="ic">🐉</span><b>บอสโลกราชันไฮดรา</b><p>ผู้เล่นทุกคนช่วยกันตีบอสยักษ์ แบ่งรางวัลตามความเสียหาย</p></div>
+    <div class="f"><span class="ic">🧭</span><b>ส่งสำรวจ & เพื่อน</b><p>ส่งมอนสเตอร์ออกสำรวจเก็บของ เพิ่มเพื่อนและไปเยี่ยมบ้านกัน</p></div>
+  </div>
+</div></section>
+
+<section style="padding-top:0"><div class="wrap">
+  <h2>เกมของเรา</h2>
+  <p class="sub">เลือกเกมที่อยากเล่น</p>
+  <div class="games">
+    <a class="game" href="amber-land/"><img src="hero_sm.jpg" alt="ตำนานป่าอัมพร" loading="lazy">
+      <div class="gb"><span class="live">● เปิดให้เล่นแล้ว</span><b>ตำนานป่าอัมพร</b><p>เลี้ยงมอนสเตอร์ · ฟักไข่ · ต่อสู้ · บุกปล้น</p></div></a>
+    <div class="game soon"><div><div style="font-size:30px">✨</div><b>เกมใหม่เร็ว ๆ นี้</b><p style="margin:4px 0 0;font-size:14px">ติดตามได้ที่หน้านี้</p></div></div>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <span>© 2026 Amber Legend</span>
+  <span><a href="amber-land/privacy.html">นโยบายความเป็นส่วนตัว</a></span>
+</div></footer>
+</body>
+</html>
