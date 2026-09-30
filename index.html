@@ -50,6 +50,9 @@ h2{font-size:clamp(22px,4vw,30px);margin:0 0 6px}
 .game{display:block;text-decoration:none;background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;transition:transform .15s,border-color .15s}
 .game:hover{transform:translateY(-3px);border-color:rgba(255,179,71,.5)}
 .game img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}
+.gv{position:relative;background:#000}.gv video{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}
+.snd{position:absolute;right:10px;bottom:10px;width:38px;height:38px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(0,0,0,.55);color:#fff;font-size:17px;cursor:pointer;display:grid;place-items:center}
+.snd:hover{background:rgba(0,0,0,.75)}
 .game .gb{padding:14px 16px 16px}
 .game .gb b{font-size:18px}
 .game .gb p{margin:4px 0 0;color:var(--muted);font-size:14px}
@@ -97,7 +100,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:10px 22px;justify-content:space-bet
   <h2>เกมของเรา</h2>
   <p class="sub">เลือกเกมที่อยากเล่น</p>
   <div class="games">
-    <a class="game" href="amber-land/"><img src="hero_sm.jpg" alt="ตำนานป่าอัมพร" loading="lazy">
+    <a class="game" href="amber-land/"><div class="gv"><video src="teaser.mp4" poster="teaser.jpg" autoplay muted loop playsinline preload="metadata" aria-label="วิดีโอตัวอย่าง ตำนานป่าอัมพร"></video><button type="button" class="snd" aria-label="เปิดเสียง">🔇</button></div>
       <div class="gb"><span class="live">● เปิดให้เล่นแล้ว</span><b>ตำนานป่าอัมพร</b><p>เลี้ยงมอนสเตอร์ · ฟักไข่ · ต่อสู้ · บุกปล้น</p></div></a>
     <div class="game soon"><div><div style="font-size:30px">✨</div><b>เกมใหม่เร็ว ๆ นี้</b><p style="margin:4px 0 0;font-size:14px">ติดตามได้ที่หน้านี้</p></div></div>
   </div>
@@ -107,5 +110,11 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:10px 22px;justify-content:space-bet
   <span>© 2026 Amber Legend</span>
   <span><a href="amber-land/privacy.html">นโยบายความเป็นส่วนตัว</a></span>
 </div></footer>
+<script>
+// วิดีโอตัวอย่างในการ์ดเกม: ปุ่มเปิด/ปิดเสียง (กดแล้วไม่เข้าเกม) · ลดการเคลื่อนไหว = ไม่เล่นอัตโนมัติ
+document.querySelectorAll('.gv').forEach(g=>{const v=g.querySelector('video'),b=g.querySelector('.snd');
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){v.removeAttribute('autoplay');v.pause();}
+  b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();v.muted=!v.muted;if(!v.muted)v.play();b.textContent=v.muted?'🔇':'🔊';b.setAttribute('aria-label',v.muted?'เปิดเสียง':'ปิดเสียง');});});
+</script>
 </body>
 </html>
