@@ -61,6 +61,15 @@ h2{font-size:clamp(22px,4vw,30px);margin:0 0 6px}
 .game.soon:hover{transform:none;border-color:var(--line)}
 footer{border-top:1px solid var(--line);padding:26px 0 40px;color:var(--muted);font-size:13px}
 footer .wrap{display:flex;flex-wrap:wrap;gap:10px 22px;justify-content:space-between}
+/* ปุ่มแชร์ข้างปุ่มเล่น · มือถือใช้แผงแชร์ของเครื่อง · คอมเปิดเมนู */
+.btn.share{border:1px solid rgba(255,179,71,.55);background:rgba(255,179,71,.12);color:var(--amber);cursor:pointer;font-family:inherit}
+.btn.share:hover{transform:translateY(-2px);background:rgba(255,179,71,.2)}
+.shareWrap{position:relative}
+.shareMenu{position:absolute;left:0;bottom:calc(100% + 8px);z-index:20;min-width:210px;padding:6px;border-radius:14px;background:#1d1610;border:1px solid var(--line);box-shadow:0 14px 40px rgba(0,0,0,.5)}
+.shareMenu a,.shareMenu button{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border:0;border-radius:10px;background:none;color:var(--text);font-size:15px;font-weight:600;font-family:inherit;text-decoration:none;cursor:pointer;text-align:left}
+.shareMenu a:hover,.shareMenu button:hover{background:rgba(255,255,255,.07)}
+.si{display:grid;place-items:center;width:26px;height:26px;border-radius:8px;color:#fff;font-weight:800;font-size:14px;flex:none}
+@media (max-width:520px){.cta .btn.main{flex:1 1 0;min-width:0;padding:14px 14px;justify-content:center}.shareWrap{flex:none}.btn.share{padding:14px 16px}.btn.share .sl{display:none}.btn.share::after{content:'แชร์'}.cta .btn.ghost{flex-basis:100%;justify-content:center}}
 @media (prefers-reduced-motion:reduce){.btn,.game{transition:none}}
 </style>
 </head>
@@ -78,6 +87,15 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:10px 22px;justify-content:space-bet
     <p class="lead">เลี้ยงมอนสเตอร์บนเกาะลอยฟ้าของคุณเอง ฟักไข่ลุ้นระดับเทพเจ้า วิวัฒนาการ ออกผจญภัยในดินแดน 4 เผ่า และบุกปล้นบ้านผู้เล่นคนอื่น</p>
     <div class="cta">
       <a class="btn main" href="amber-land/">▶ เข้าเล่นตำนานป่าอัมพร</a>
+      <div class="shareWrap">
+        <button type="button" class="btn share" id="shareBtn" aria-haspopup="true" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg><span class="sl">แชร์ให้เพื่อน</span></button>
+        <div class="shareMenu" id="shareMenu" hidden>
+          <a data-s="fb" target="_blank" rel="noopener"><span class="si" style="background:#1877f2">f</span>Facebook</a>
+          <a data-s="line" target="_blank" rel="noopener"><span class="si" style="background:#06c755">L</span>LINE</a>
+          <a data-s="x" target="_blank" rel="noopener"><span class="si" style="background:#000">𝕏</span>X</a>
+          <button type="button" data-s="copy"><span class="si" style="background:#555">🔗</span><span>คัดลอกลิงก์</span></button>
+        </div>
+      </div>
       <a class="btn ghost" href="#features">ดูว่ามีอะไรบ้าง</a>
     </div>
   </div>
@@ -115,6 +133,21 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:10px 22px;justify-content:space-bet
 document.querySelectorAll('.gv').forEach(g=>{const v=g.querySelector('video'),b=g.querySelector('.snd');
   if(matchMedia('(prefers-reduced-motion: reduce)').matches){v.removeAttribute('autoplay');v.pause();}
   b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();v.muted=!v.muted;if(!v.muted)v.play();b.textContent=v.muted?'🔇':'🔊';b.setAttribute('aria-label',v.muted?'เปิดเสียง':'ปิดเสียง');});});
+// ปุ่มแชร์: มือถือ = แผงแชร์ของเครื่อง (LINE/Facebook/Messenger ฯลฯ) · คอม = เมนู Facebook / LINE / X / คัดลอกลิงก์
+(()=>{const U='https://amberlegend.com/',T='ตำนานป่าอัมพร — เกมเลี้ยงมอนสเตอร์บนเกาะลอยฟ้า เล่นฟรีบนเว็บ มาเล่นด้วยกัน!';
+  const b=document.getElementById('shareBtn'),m=document.getElementById('shareMenu'),e=encodeURIComponent;
+  const L={fb:'https://www.facebook.com/sharer/sharer.php?u='+e(U),line:'https://social-plugins.line.me/lineit/share?url='+e(U),x:'https://twitter.com/intent/tweet?url='+e(U)+'&text='+e(T)};
+  m.querySelectorAll('a[data-s]').forEach(a=>a.href=L[a.dataset.s]);
+  const close=()=>{m.hidden=true;b.setAttribute('aria-expanded','false');};
+  b.addEventListener('click',async ev=>{ev.stopPropagation();
+    if(navigator.share&&matchMedia('(pointer:coarse)').matches){try{await navigator.share({title:'ตำนานป่าอัมพร',text:T,url:U});}catch(_){}return;}
+    m.hidden=!m.hidden;b.setAttribute('aria-expanded',String(!m.hidden));});
+  m.querySelector('[data-s=copy]').addEventListener('click',async ev=>{const sp=ev.currentTarget.querySelector('span:last-child');
+    try{await navigator.clipboard.writeText(U);}catch(_){const t=document.createElement('textarea');t.value=U;document.body.append(t);t.select();document.execCommand('copy');t.remove();}
+    sp.textContent='คัดลอกแล้ว ✓';setTimeout(()=>{sp.textContent='คัดลอกลิงก์';close();},1200);});
+  m.querySelectorAll('a').forEach(a=>a.addEventListener('click',close));
+  document.addEventListener('click',ev=>{if(!m.hidden&&!m.contains(ev.target))close();});
+  document.addEventListener('keydown',ev=>{if(ev.key==='Escape')close();});})();
 </script>
 </body>
 </html>
