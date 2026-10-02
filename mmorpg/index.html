@@ -140,6 +140,7 @@ html,body{height:100%;margin:0;overflow:hidden;background:var(--ground);color:va
 .gate-wait{margin:8px 0;font:15px var(--f-body);color:var(--ink-dim)}
 .gate-label,.gate-card label{margin:4px 0 -4px;font:600 13px var(--f-body);color:var(--ink-dim)}
 .gate-note{margin:0;font:13px/1.5 var(--f-body);color:var(--ink-dim)}
+.gate-who{margin:0;padding:9px 12px;border-radius:10px;border:1px solid var(--rim);background:rgba(226,194,126,.09);font:600 14px/1.5 var(--f-body);color:var(--ink);overflow-wrap:anywhere}
 .gate-err{margin:0;font:600 13.5px/1.5 var(--f-body);color:#ffb39f}
 .gate-card input{font:600 17px var(--f-body);color:#fff8e6;background:#15110d;border:1.5px solid var(--rim);border-radius:10px;padding:10px 12px;width:100%;box-sizing:border-box}
 .gate-card input:focus-visible{outline:2px solid var(--rim-hi);outline-offset:1px}
@@ -150,7 +151,7 @@ html,body{height:100%;margin:0;overflow:hidden;background:var(--ground);color:va
 .gbtn:disabled,.glink:disabled{opacity:.55;cursor:default;filter:none}
 .glink{align-self:center;font:600 13.5px var(--f-body);color:var(--ink-dim);background:none;border:0;text-decoration:underline;cursor:pointer;padding:6px}
 .glink.danger{color:#e5a090}
-.gate-row{display:flex;justify-content:space-between;gap:8px}
+.gate-row{display:flex;justify-content:space-around;gap:8px;flex-wrap:wrap}
 .cls-card{display:flex;gap:12px;align-items:center;padding:10px 12px;border-radius:12px;border:1.5px solid var(--rim-hi);background:rgba(226,194,126,.09)}
 .cls-card svg{width:64px;height:64px;flex:none;border-radius:50%;border:2px solid var(--rim)}
 .cls-body{display:flex;flex-direction:column;gap:3px;min-width:0}
@@ -231,11 +232,14 @@ html,body{height:100%;margin:0;overflow:hidden;background:var(--ground);color:va
       <h1>ทุ่งมอสฮอลโลว์</h1>
       <div id="gLoading" class="gate-step"><p class="gate-wait">กำลังเชื่อมต่อเซิร์ฟเวอร์…</p></div>
       <div id="gLogin" class="gate-step" hidden>
-        <p class="gate-lead">เข้าสู่ระบบเพื่อสร้างตัวละคร แล้วออกผจญภัยกับผู้เล่นคนอื่นในแมพเดียวกัน</p>
+        <p class="gate-lead" id="gLead">เข้าสู่ระบบเพื่อสร้างตัวละคร แล้วออกผจญภัยกับผู้เล่นคนอื่นในแมพเดียวกัน</p>
+        <p class="gate-who" id="gWho" hidden></p>
+        <button type="button" class="gbtn primary" id="btnContinue" hidden>เล่นต่อด้วยบัญชีนี้</button>
         <button type="button" class="gbtn primary" id="btnGuest">เข้าเล่นแบบผู้เยี่ยมชม</button>
         <button type="button" class="gbtn" id="btnGoogle"><svg viewBox="0 0 18 18" aria-hidden="true"><path fill="#4285F4" d="M17.6 9.2c0-.6-.1-1.2-.2-1.8H9v3.4h4.8a4.1 4.1 0 0 1-1.8 2.7v2.2h2.9c1.7-1.6 2.7-3.9 2.7-6.5z"/><path fill="#34A853" d="M9 18c2.4 0 4.5-.8 6-2.2l-2.9-2.2c-.8.5-1.8.9-3.1.9-2.4 0-4.4-1.6-5.1-3.8H.9v2.3A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.9 10.7a5.4 5.4 0 0 1 0-3.4V5H.9a9 9 0 0 0 0 8z"/><path fill="#EA4335" d="M9 3.6c1.3 0 2.5.5 3.4 1.3L15 2.3A9 9 0 0 0 .9 5l3 2.3C4.6 5.2 6.6 3.6 9 3.6z"/></svg>เข้าสู่ระบบด้วย Google</button>
         <p class="gate-err" id="gErr" hidden></p>
-        <button type="button" class="glink" id="btnOffline">เล่นคนเดียวแบบออฟไลน์</button>
+        <button type="button" class="gbtn" id="btnSwitchG" hidden>สลับไปใช้บัญชี Google นั้น</button>
+        <div class="gate-row"><button type="button" class="glink" id="btnSwitch" hidden>ใช้บัญชีอื่น</button><button type="button" class="glink" id="btnOffline">เล่นคนเดียวแบบออฟไลน์</button></div>
       </div>
       <form id="charForm" autocomplete="off">
       <div id="gChar" class="gate-step" hidden>
@@ -1730,8 +1734,20 @@ const AUTH_ERR=e=>{ const m=String((e&&(e.message||e.error_description))||e||'')
   if (/identity.*(exist|linked)/i.test(m)) return 'บัญชี Google นี้ผูกกับบัญชีอื่นอยู่แล้ว';
   return 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ลองใหม่อีกครั้ง หรือเล่นแบบออฟไลน์'; };
 
+const acctLabel=()=> NP.user ? (NP.user.is_anonymous ? 'บัญชีผู้เยี่ยมชมของเบราว์เซอร์นี้' : 'บัญชี Google'+(NP.user.email?': '+NP.user.email:'')) : '';
+// the sign-in screen is always the first thing shown; with a remembered session it names the account and offers to continue
+function showLogin(msg){
+  const u=NP.user, anon=!!(u && u.is_anonymous);
+  $('gWho').hidden=!u; if (u) $('gWho').textContent='เข้าสู่ระบบอยู่: '+acctLabel();
+  $('btnContinue').hidden=!u; $('btnGuest').hidden=!!u; $('btnGoogle').hidden=!!u && !anon; $('btnSwitch').hidden=!u; $('btnSwitchG').hidden=true;
+  $('btnSwitch').dataset.arm=''; $('btnSwitch').textContent='ใช้บัญชีอื่น';
+  $('gLead').textContent = u ? (anon ? 'เล่นต่อด้วยบัญชีผู้เยี่ยมชมนี้ได้เลย หรือเข้าสู่ระบบด้วย Google เพื่อเก็บตัวละครไว้เล่นได้ทุกเครื่อง' : 'บัญชีนี้ใช้ร่วมกับเกมอื่นบน amberlegend.com')
+                               : 'เข้าสู่ระบบเพื่อสร้างตัวละคร แล้วออกผจญภัยกับผู้เล่นคนอื่นในแมพเดียวกัน';
+  gateErr('gErr', msg||''); gateShow('gLogin');
+}
 async function gateInit(){
   gateShow('gLoading');
+  const back=location.hash+location.search, cameBack=/access_token=|[?&#]code=/.test(back), linkClash=/identity_already_exists/.test(back);
   try{
     if (!window.supabase) throw new Error('no client');
     NP.sb=window.supabase.createClient(SB_URL,SB_KEY,{ auth:{ storage:SafeStore, persistSession:true, autoRefreshToken:true, detectSessionInUrl:true }, realtime:{ params:{ eventsPerSecond:20 } } });
@@ -1739,8 +1755,20 @@ async function gateInit(){
     if (error){ try{ await NP.sb.auth.signOut({scope:'local'}); }catch(e){} }
     NP.user=(!error && data && data.session && data.session.user) || null;
   }catch(e){ NP.user=null; NP.netErr=true; }
-  if (NP.user){ NP.mode='online'; afterLogin(); }
-  else { gateShow('gLogin'); gateErr('gErr', NP.netErr ? 'ตอนนี้ต่อเซิร์ฟเวอร์ไม่ได้ เล่นแบบออฟไลน์ได้ แต่จะไม่เห็นผู้เล่นคนอื่น' : ''); }
+  if (linkClash){ try{ history.replaceState(null,'',location.pathname); }catch(e){} showLogin('บัญชี Google นี้มีบัญชีเกมอยู่แล้ว จึงผูกกับบัญชีผู้เยี่ยมชมนี้ไม่ได้'); $('btnSwitchG').hidden=false; return; }
+  if (NP.user && cameBack){ NP.mode='online'; afterLogin(); return; }       // just returned from Google: go straight in
+  showLogin(NP.netErr ? 'ตอนนี้ต่อเซิร์ฟเวอร์ไม่ได้ เล่นแบบออฟไลน์ได้ แต่จะไม่เห็นผู้เล่นคนอื่น' : '');
+}
+// leaving a guest account cannot be undone on this browser (it is also the guest save of the other games here), so ask twice
+async function leaveAccount(btn, after){
+  const anon=NP.user && NP.user.is_anonymous;
+  if (anon && !btn.dataset.arm){ btn.dataset.arm='1'; btn.textContent='บัญชีผู้เยี่ยมชมนี้จะหายจากเครื่องนี้ รวมถึงเซฟเกมอื่นบน amberlegend.com กดอีกครั้งเพื่อยืนยัน'; return; }
+  gateBusy(true);
+  if (NP.inWorld){ try{ await saveChar(true); }catch(e){} }
+  netLeave(); NP.inWorld=false;
+  if (NP.sb && NP.user){ try{ await NP.sb.auth.signOut({scope:'local'}); }catch(e){} }
+  NP.user=null; NP.char=null; NP.mode='none'; gateBusy(false); setNetBadge();
+  if (after) after(); else showLogin('');
 }
 function loadChar(){
   let c=null;
@@ -1766,7 +1794,7 @@ function showSelect(){
   const anon = NP.mode==='online' && NP.user && NP.user.is_anonymous;
   $('selAcct').textContent = NP.mode!=='online' ? 'โหมดออฟไลน์: ตัวละครเก็บในเครื่องนี้ และจะไม่เห็นผู้เล่นคนอื่น' : anon ? 'บัญชีผู้เยี่ยมชม: ตัวละครผูกกับเบราว์เซอร์นี้ ผูก Google เพื่อเล่นได้ทุกเครื่อง' : `บัญชี Google${NP.user.email?': '+NP.user.email:''}`;
   $('btnLink').hidden=!anon; $('btnLogout').textContent = NP.mode==='online' ? 'ออกจากระบบ' : 'กลับหน้าเข้าสู่ระบบ';
-  $('btnEnter').textContent = inW ? 'กลับเข้าเกม' : 'เข้าสู่โลก'; $('btnDelete').dataset.arm=''; $('btnDelete').textContent='ลบตัวละคร';
+  $('btnEnter').textContent = inW ? 'กลับเข้าเกม' : 'เข้าสู่โลก'; $('btnDelete').dataset.arm=''; $('btnDelete').textContent='ลบตัวละคร'; $('btnLogout').dataset.arm='';
   gateErr('gSelErr',''); gateShow('gSelect');
 }
 function enterWorld(){
@@ -1789,13 +1817,19 @@ $('btnGuest').addEventListener('click', async ()=>{
   gateBusy(false);
 });
 const oauthBack=()=>location.origin+location.pathname;
+async function googleSignIn(){ const r=await NP.sb.auth.signInWithOAuth({ provider:'google', options:{ redirectTo:oauthBack(), queryParams:{ prompt:'select_account' } } }); if (r.error) throw r.error; }
 $('btnGoogle').addEventListener('click', async ()=>{
   if (!NP.sb){ gateErr('gErr', AUTH_ERR()); return; }
   gateBusy(true); gateErr('gErr','');
-  try{ const r=await NP.sb.auth.signInWithOAuth({ provider:'google', options:{ redirectTo:oauthBack(), queryParams:{ prompt:'select_account' } } }); if (r.error) throw r.error; }
-  catch(e){ gateErr('gErr', AUTH_ERR(e)); gateBusy(false); }
+  try{
+    if (NP.user && NP.user.is_anonymous){ const r=await NP.sb.auth.linkIdentity({ provider:'google', options:{ redirectTo:oauthBack() } }); if (!r.error) return; }
+    await googleSignIn();
+  }catch(e){ gateErr('gErr', AUTH_ERR(e)); gateBusy(false); }
 });
-$('btnOffline').addEventListener('click', ()=>{ NP.mode='offline'; NP.user=null; afterLogin(); });
+$('btnContinue').addEventListener('click', ()=>{ if (!NP.user) return; NP.mode='online'; afterLogin(); });
+$('btnSwitch').addEventListener('click', ()=>leaveAccount($('btnSwitch')));
+$('btnSwitchG').addEventListener('click', ()=>leaveAccount($('btnSwitchG'), async ()=>{ gateBusy(true); try{ await googleSignIn(); }catch(e){ gateBusy(false); showLogin(AUTH_ERR(e)); } }));
+$('btnOffline').addEventListener('click', ()=>{ NP.mode='offline'; afterLogin(); });
 $('btnLink').addEventListener('click', async ()=>{
   gateBusy(true); gateErr('gSelErr','');
   try{ await saveChar(true); const r=await NP.sb.auth.linkIdentity({ provider:'google', options:{ redirectTo:oauthBack() } }); if (r.error) throw r.error; }
@@ -1812,12 +1846,9 @@ $('charForm').addEventListener('submit', async ev=>{
   gateBusy(false);
 });
 $('btnEnter').addEventListener('click', enterWorld);
-$('btnLogout').addEventListener('click', async ()=>{
-  gateBusy(true);
-  if (NP.inWorld){ try{ await saveChar(true); }catch(e){} }
-  netLeave(); NP.inWorld=false;
-  if (NP.mode==='online'){ try{ await NP.sb.auth.signOut({scope:'local'}); }catch(e){} }
-  NP.user=null; NP.char=null; NP.mode='none'; gateBusy(false); gateErr('gErr',''); gateShow('gLogin'); setNetBadge();
+$('btnLogout').addEventListener('click', ()=>{
+  if (NP.mode!=='online'){ netLeave(); NP.inWorld=false; NP.char=null; NP.mode='none'; setNetBadge(); showLogin(''); return; }
+  leaveAccount($('btnLogout'));
 });
 $('btnDelete').addEventListener('click', async ()=>{
   const b=$('btnDelete');
