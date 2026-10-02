@@ -128,6 +128,40 @@ html,body{height:100%;margin:0;overflow:hidden;background:var(--ground);color:va
   #fps{top:calc(80px + env(safe-area-inset-top,0px))}
 }
 @media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+#btnAccount{position:fixed;left:14px;top:calc(118px + env(safe-area-inset-top,0px));font:600 12px var(--f-body);color:var(--ink);background:var(--panel);border:1px solid var(--rim);border-radius:8px;padding:4px 10px;cursor:pointer}
+#btnAccount:hover,#btnAccount:focus-visible{border-color:var(--rim-hi);outline:none}
+#gate{position:fixed;inset:0;z-index:30;display:flex;padding:16px;overflow:auto;background:radial-gradient(ellipse at 50% 40%,rgba(18,24,18,.55),rgba(8,10,8,.86))}
+.gate-card{margin:auto;width:min(420px,100%);background:var(--panel);border:1.5px solid var(--rim);border-radius:16px;padding:22px 22px 18px;box-shadow:0 18px 50px #000b;display:flex;flex-direction:column;gap:10px}
+.gate-eyebrow{margin:0;font:600 12px var(--f-body);letter-spacing:.14em;color:var(--ink-dim)}
+.gate-card h1{margin:0 0 4px;font:700 34px/1.1 var(--f-display);color:#fff4d8;text-shadow:0 2px 0 #3a2a10;text-wrap:balance}
+.gate-card h2{margin:0;font:700 19px var(--f-display);color:var(--rim-hi)}
+.gate-step{display:flex;flex-direction:column;gap:10px}
+.gate-lead{margin:0 0 4px;font:15px/1.55 var(--f-body);color:var(--ink)}
+.gate-wait{margin:8px 0;font:15px var(--f-body);color:var(--ink-dim)}
+.gate-label,.gate-card label{margin:4px 0 -4px;font:600 13px var(--f-body);color:var(--ink-dim)}
+.gate-note{margin:0;font:13px/1.5 var(--f-body);color:var(--ink-dim)}
+.gate-err{margin:0;font:600 13.5px/1.5 var(--f-body);color:#ffb39f}
+.gate-card input{font:600 17px var(--f-body);color:#fff8e6;background:#15110d;border:1.5px solid var(--rim);border-radius:10px;padding:10px 12px;width:100%;box-sizing:border-box}
+.gate-card input:focus-visible{outline:2px solid var(--rim-hi);outline-offset:1px}
+.gbtn{display:flex;align-items:center;justify-content:center;gap:10px;font:700 16px var(--f-display);color:var(--ink);background:var(--wood-2);border:1.5px solid var(--rim);border-radius:10px;padding:11px 14px;cursor:pointer}
+.gbtn svg{width:18px;height:18px;background:#fff;border-radius:3px;padding:2px}
+.gbtn.primary{background:linear-gradient(#e9c873,#b98f3d);color:#2b2010;border-color:#f2dc9a}
+.gbtn:hover{filter:brightness(1.1)} .gbtn:focus-visible,.glink:focus-visible{outline:2px solid var(--rim-hi);outline-offset:2px}
+.gbtn:disabled,.glink:disabled{opacity:.55;cursor:default;filter:none}
+.glink{align-self:center;font:600 13.5px var(--f-body);color:var(--ink-dim);background:none;border:0;text-decoration:underline;cursor:pointer;padding:6px}
+.glink.danger{color:#e5a090}
+.gate-row{display:flex;justify-content:space-between;gap:8px}
+.cls-card{display:flex;gap:12px;align-items:center;padding:10px 12px;border-radius:12px;border:1.5px solid var(--rim-hi);background:rgba(226,194,126,.09)}
+.cls-card svg{width:64px;height:64px;flex:none;border-radius:50%;border:2px solid var(--rim)}
+.cls-body{display:flex;flex-direction:column;gap:3px;min-width:0}
+.cls-body b{font:700 18px var(--f-display);color:#fff4d8;overflow-wrap:anywhere}
+.cls-body span{font:13.5px/1.45 var(--f-body);color:var(--ink)}
+.cls-body dl{display:grid;grid-template-columns:auto 1fr;gap:3px 8px;margin:4px 0 0;align-items:center;font:600 12px var(--f-body);color:var(--ink-dim)}
+.cls-body dd{margin:0;height:7px;border-radius:4px;background:#15110d;overflow:hidden}
+.cls-body dd i{display:block;height:100%;width:var(--v);background:linear-gradient(90deg,#b98f3d,#e9c873)}
+.np.other{color:#bfe6ff}
+#charForm{display:contents}
+[hidden]{display:none!important}
 </style>
 
 </head>
@@ -150,7 +184,7 @@ html,body{height:100%;margin:0;overflow:hidden;background:var(--ground);color:va
     </div>
     <div class="lvbadge" id="lv">1</div>
     <div class="bars">
-      <div class="who">เอลวิน <small>นักธนู</small></div>
+      <div class="who"><span id="whoName">นักผจญภัย</span> <small>นักธนู</small></div>
       <div class="bar"><i id="hpI"></i><b id="hpT">520 / 520</b></div>
       <div class="bar sp"><i id="spI"></i><b id="spT">220 / 220</b></div>
     </div>
@@ -168,7 +202,7 @@ html,body{height:100%;margin:0;overflow:hidden;background:var(--ground);color:va
   <button type="button" id="mapbox" title="คลิกเพื่อเปิดแผนที่โลก (ปุ่ม M)">
     <header><span>Ch 1 · <span id="mapName">ทุ่งมอสฮอลโลว์</span></span><span id="clock">--:--</span></header>
     <canvas id="minimap" width="176" height="110"></canvas>
-    <span class="mmhint">แผนที่โลก (M)</span>
+    <span class="mmhint" id="mmHint">แผนที่โลก (M)</span>
   </button>
   <div id="banner"><h2></h2><p></p></div>
   <div id="fade"></div>
@@ -190,11 +224,64 @@ html,body{height:100%;margin:0;overflow:hidden;background:var(--ground);color:va
 
   <div id="help"><b>คลิกพื้น</b> เดิน · <b>คลิกมอน</b> ยิงธนู<br><b>2</b> ฝนธนู · <b>3</b> ยา · <b>ล้อเมาส์</b> ซูม · <b>M</b> แผนที่โลก</div>
 
+  <button type="button" id="btnAccount" title="ตัวละครและบัญชี">บัญชี</button>
+  <div id="gate">
+    <div class="gate-card">
+      <p class="gate-eyebrow">MMORPG ต้นแบบ</p>
+      <h1>ทุ่งมอสฮอลโลว์</h1>
+      <div id="gLoading" class="gate-step"><p class="gate-wait">กำลังเชื่อมต่อเซิร์ฟเวอร์…</p></div>
+      <div id="gLogin" class="gate-step" hidden>
+        <p class="gate-lead">เข้าสู่ระบบเพื่อสร้างตัวละคร แล้วออกผจญภัยกับผู้เล่นคนอื่นในแมพเดียวกัน</p>
+        <button type="button" class="gbtn primary" id="btnGuest">เข้าเล่นแบบผู้เยี่ยมชม</button>
+        <button type="button" class="gbtn" id="btnGoogle"><svg viewBox="0 0 18 18" aria-hidden="true"><path fill="#4285F4" d="M17.6 9.2c0-.6-.1-1.2-.2-1.8H9v3.4h4.8a4.1 4.1 0 0 1-1.8 2.7v2.2h2.9c1.7-1.6 2.7-3.9 2.7-6.5z"/><path fill="#34A853" d="M9 18c2.4 0 4.5-.8 6-2.2l-2.9-2.2c-.8.5-1.8.9-3.1.9-2.4 0-4.4-1.6-5.1-3.8H.9v2.3A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.9 10.7a5.4 5.4 0 0 1 0-3.4V5H.9a9 9 0 0 0 0 8z"/><path fill="#EA4335" d="M9 3.6c1.3 0 2.5.5 3.4 1.3L15 2.3A9 9 0 0 0 .9 5l3 2.3C4.6 5.2 6.6 3.6 9 3.6z"/></svg>เข้าสู่ระบบด้วย Google</button>
+        <p class="gate-err" id="gErr" hidden></p>
+        <button type="button" class="glink" id="btnOffline">เล่นคนเดียวแบบออฟไลน์</button>
+      </div>
+      <form id="charForm" autocomplete="off">
+      <div id="gChar" class="gate-step" hidden>
+        <h2>สร้างตัวละคร</h2>
+        <label for="charName">ชื่อตัวละคร</label>
+        <input id="charName" name="charName" type="text" maxlength="12" placeholder="2–12 ตัวอักษร" required>
+        <p class="gate-label">อาชีพ</p>
+        <div class="cls-card sel" aria-current="true">
+          <svg viewBox="0 0 70 70" aria-hidden="true">
+            <circle cx="35" cy="35" r="34" fill="#35503f"/>
+            <ellipse cx="35" cy="74" rx="22" ry="16" fill="#3f8f92"/>
+            <path d="M15 37L4 27l14 5zM55 37l11-10-14 5z" fill="#f6dcc6"/>
+            <circle cx="35" cy="38" r="17" fill="#f6dcc6"/>
+            <path d="M17 38c-1-14 7-23 18-23s19 9 18 23l-4-8-3 6-3-9-4 8-4-9-4 9-3-8-4 7-3-6z" fill="#eecb6a"/>
+            <ellipse cx="29" cy="42" rx="2.7" ry="3.5" fill="#2f86cf"/><ellipse cx="41" cy="42" rx="2.7" ry="3.5" fill="#2f86cf"/>
+            <path d="M33 49q2 1.2 4 0" stroke="#a85a48" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+          </svg>
+          <div class="cls-body">
+            <b>นักธนู</b>
+            <span>โจมตีจากระยะไกล ยิงต่อเนื่อง และใช้ฝนธนูโจมตีหมู่</span>
+            <dl><dt>โจมตี</dt><dd><i style="--v:80%"></i></dd><dt>ระยะ</dt><dd><i style="--v:100%"></i></dd><dt>ความอึด</dt><dd><i style="--v:45%"></i></dd></dl>
+          </div>
+        </div>
+        <p class="gate-note">อาชีพอื่นจะเปิดให้เลือกภายหลัง</p>
+        <p class="gate-err" id="gCharErr" hidden></p>
+        <button type="submit" class="gbtn primary" id="btnCreate">สร้างตัวละครและเข้าสู่โลก</button>
+      </div>
+      </form>
+      <div id="gSelect" class="gate-step" hidden>
+        <h2>ตัวละครของคุณ</h2>
+        <div class="cls-card sel"><div class="cls-body"><b id="selName"></b><span id="selInfo"></span></div></div>
+        <p class="gate-note" id="selAcct"></p>
+        <p class="gate-err" id="gSelErr" hidden></p>
+        <button type="button" class="gbtn primary" id="btnEnter">เข้าสู่โลก</button>
+        <button type="button" class="gbtn" id="btnLink" hidden>ผูกบัญชี Google</button>
+        <div class="gate-row"><button type="button" class="glink" id="btnLogout">ออกจากระบบ</button><button type="button" class="glink danger" id="btnDelete">ลบตัวละคร</button></div>
+      </div>
+    </div>
+  </div>
   <div id="expbar"><i id="expI"></i><span id="expT">EXP 0 / 120</span></div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/utils/SkeletonUtils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
 (() => {
 const T = THREE;
@@ -1036,6 +1123,7 @@ function loadMap(id, arriveDir){
   me.pos.set(sx,0,sz); me.y=groundY(sx,sz); me.spd=0; me.warpLock=true;
   $('mapName').textContent=M.name;
   showBanner(M);
+  if (NP.inWorld){ NP.dirty=true; netJoin(M.id); }
   addLog(`เข้าสู่ ${M.name} (Lv.${M.lv[0]}–${M.lv[1]})`,'sys');
 }
 let warping=false;
@@ -1125,19 +1213,19 @@ function hit(m, dmg){
   }
 }
 function gainExp(n){
-  me.exp+=n;
+  me.exp+=n; NP.dirty=true;
   while(me.exp>=expNeed()){
     me.exp-=expNeed(); me.lv++; me.maxHp+=45; me.maxSp+=18; me.hp=me.maxHp; me.sp=me.maxSp;
     floatText(P.group.position.clone().add(new T.Vector3(0,2.8,0)),'LEVEL UP!','lv');
     for(let i=0;i<3;i++) ring(P.group.position, '#ffe08a', 0.4, 2.2+i, 0.9+i*0.25);
     spark(P.group.position.clone().add(new T.Vector3(0,0.5,0)),'#ffe9a0',30,2.2,1.4,0.35,2.4);
-    addLog(`เลเวลอัป! ตอนนี้ Lv.${me.lv}`,'sys');
+    addLog(`เลเวลอัป! ตอนนี้ Lv.${me.lv}`,'sys'); NP.saveT=Math.min(NP.saveT,2);
   }
 }
 function hurtMe(d){
   if (me.dead) return; d=Math.round(d); me.hp-=d; me.combatT=4;
   floatText(P.group.position.clone().add(new T.Vector3(0,2.3,0)), d, 'hurt');
-  if (me.hp<=0){ me.hp=0; me.dead=true; me.deadT=0; me.target=null; me.dest=null; me.path=null; addLog('เอลวินหมดสติ… จะฟื้นที่จุดเริ่มต้น','bad'); monsters.forEach(m=>m.aggro=false); }
+  if (me.hp<=0){ me.hp=0; me.dead=true; me.deadT=0; me.target=null; me.dest=null; me.path=null; addLog('คุณหมดสติ… จะฟื้นที่จุดเริ่มต้น','bad'); monsters.forEach(m=>m.aggro=false); }
 }
 function arrowRain(){
   if (me.dead || me.cd2>0 || me.skyT>=0) return;
@@ -1146,7 +1234,7 @@ function arrowRain(){
   if (at.distanceTo(P.group.position)>11){ addLog('เป้าหมายอยู่ไกลเกินไป','bad'); return; }
   if (me.sp<25){ addLog('SP ไม่พอ','bad'); return; }
   me.sp-=25; me.cd2=6; me.combatT=4; me.atkT=-1; me.skyT=0; me.skyRel=false; me.rainAt=at; me.dest=null; me.path=null;
-  me.rainFace=Math.atan2(at.x-me.pos.x, at.z-me.pos.z);
+  me.rainFace=Math.atan2(at.x-me.pos.x, at.z-me.pos.z); netEvt('sky', at.x, at.z);
   ring(at,'#bfe3ff',0.3,3.3,0.9,0.7);
 }
 function potion(){
@@ -1196,6 +1284,7 @@ canvas.addEventListener('pointermove', ev=>{
 let zoom=1.5;
 canvas.addEventListener('wheel', ev=>{ ev.preventDefault(); zoom=Math.min(2.4,Math.max(0.9,zoom+ev.deltaY*0.0015)); }, {passive:false});
 addEventListener('keydown', ev=>{
+  if (GATE.open) return;
   if (ev.key==='2') arrowRain();
   else if (ev.key==='3') potion();
   else if (ev.key==='1' && hovered){ me.target=hovered; me.dest=null; me.path=null; }
@@ -1222,7 +1311,7 @@ function updatePlayer(dt, t){
     me.deadT+=dt;
     if (me.deadT>3){ me.dead=false; me.hp=me.maxHp; me.sp=me.maxSp; me.pos.set(START.x,0,START.z); me.spd=0; me.y=groundY(START.x,START.z); ring(new T.Vector3(START.x,me.y,START.z),'#bfe6ff',0.4,2.2,0.8); addLog('ฟื้นคืนชีพแล้ว','sys'); }
     P.group.position.set(me.pos.x, me.y, me.pos.z);
-    animateArcher(dt,t,0,false); if (MODEL.ready) animateModel(dt,0,false); return;
+    animateArcher(dt,t,0,false); if (MODEL.ready){ syncLocalSt(); animateModel(MODEL,dt,0,false); } return;
   }
   holdT-=dt; me.castCd-=dt; me.cd2=Math.max(0,me.cd2-dt); me.cd3=Math.max(0,me.cd3-dt); me.combatT-=dt; me.spWarn-=dt;
   let moveTo=null, face=null, aiming=false;
@@ -1233,7 +1322,7 @@ function updatePlayer(dt, t){
     else {
       aiming=true; face=Math.atan2(tp.x-me.pos.x, tp.z-me.pos.z);
       if (me.atkT<0 && me.skyT<0 && me.castCd<=0 && me.spd<0.8 && (!MODEL.ready || MODEL.w.shoot>0.55)){
-        if (me.sp>=4){ me.sp-=4; me.atkT=0; me.released=false; me.atkTarget=tg; me.combatT=4; }
+        if (me.sp>=4){ me.sp-=4; me.atkT=0; me.released=false; me.atkTarget=tg; me.combatT=4; netEvt('atk', tg.group.position.x, tg.group.position.z); }
         else if (me.spWarn<=0){ addLog('SP ไม่พอสำหรับยิงธนู','bad'); me.spWarn=3; }
       }
     }
@@ -1277,7 +1366,7 @@ function updatePlayer(dt, t){
   me.y += (groundY(me.pos.x,me.pos.z)-me.y)*ex(22,dt);
   P.group.position.set(me.pos.x, me.y, me.pos.z); P.group.rotation.y=me.ang;
   animateArcher(dt,t,me.spd,aiming);
-  if (MODEL.ready) animateModel(dt, me.spd, aiming);
+  if (MODEL.ready){ syncLocalSt(); animateModel(MODEL, dt, me.spd, aiming); }
 }
 function updateMonsters(dt, t){
   for(const m of monsters){
@@ -1410,11 +1499,11 @@ function hermitePath(keys, x, out, startBoost){
   out.copy(k0[1]).multiplyScalar(2*u3-3*u2+1).addScaledVector(hm0,(u3-2*u2+u)*h).addScaledVector(k1[1],-2*u3+3*u2).addScaledVector(hm1,(u3-u2)*h);
   return out;
 }
-function applyAimIK(w, dt, sky){
-  const M=MODEL, B=M.B; if (!B) return;
+function applyAimIK(M, w, dt){
+  const B=M.B, st=M.st, sky=st.wSky||0, G=M.group; if (!B) return;
   const S=M.sp || (M.sp={ bow:{p:new T.Vector3(),v:new T.Vector3()}, draw:{p:new T.Vector3(),v:new T.Vector3()}, init:false, d:0, raise:0.6, kick:0, relDone:false, shots:0 });
   if (w<0.001){ S.init=false; S.d=0; S.kick=0; S.shots=0; S.grip=false; M.arrow.visible=false; M.root.rotation.y=0; return; }
-  const x = me.atkT>=0 ? me.atkT : (me.skyT>=0 ? me.skyT : -1), K = me.atkT>=0 ? SHOT : SKYSHOT;
+  const x = st.atkT>=0 ? st.atkT : (st.skyT>=0 ? st.skyT : -1), K = st.atkT>=0 ? SHOT : SKYSHOT;
   // --- body: side-on stance from the feet up, a little extra twist and lean as the string comes back ---
   const dT = x<0 ? 0 : x<K.nock ? 0 : x<K.anchor ? sm01((x-K.nock)/(K.anchor-K.nock)) : x<K.rel ? 1 : 1-sm01((x-K.rel)/(K.end-K.rel));
   S.d += (dT-S.d)*ex(16,dt);
@@ -1423,7 +1512,7 @@ function applyAimIK(w, dt, sky){
   if (x<K.rel) S.relDone=false;
   const we=w*w*(3-2*w), stance=AIMP.stance*we;
   M.root.rotation.y=stance; M.root.updateMatrixWorld(true);
-  ik_f.set(Math.sin(me.ang),0,Math.cos(me.ang)); ik_l.set(Math.cos(me.ang),0,-Math.sin(me.ang)); ik_r.copy(ik_l).negate();
+  ik_f.set(Math.sin(st.ang),0,Math.cos(st.ang)); ik_l.set(Math.cos(st.ang),0,-Math.sin(st.ang)); ik_r.copy(ik_l).negate();
   const tw=(0.14+0.16*S.d-0.07*S.kick)*w;
   [B.spine,B.spine1,B.spine2].forEach(b=>twistBone(b, UPV, tw/3));
   const back=(stance+tw);
@@ -1433,8 +1522,8 @@ function applyAimIK(w, dt, sky){
   twistBone(B.head, ik_side, (0.05*S.d-0.05*S.kick)*w);
   // --- aim frame ---
   B.rArm.getWorldPosition(ik_bs); B.lArm.getWorldPosition(ik_ds);     // bow shoulder (right), draw shoulder (left)
-  const tgm = me.atkT>=0 && me.atkTarget && !me.atkTarget.dead ? me.atkTarget : (me.target && !me.target.dead ? me.target : null);
-  if (tgm) ik_aimAt.copy(tgm.group.position).add(ik_tmp.set(0,0.9,0)); else ik_aimAt.copy(ik_bs).addScaledVector(ik_f,5);
+  const tgm = st.aim;      // world position of what is being aimed at (or null)
+  if (tgm) ik_aimAt.copy(tgm).add(ik_tmp.set(0,0.9,0)); else ik_aimAt.copy(ik_bs).addScaledVector(ik_f,5);
   ik_ad.copy(ik_aimAt).sub(ik_bs); ik_ad.y*=0.5; ik_ad.normalize();
   if (sky>0.001) ik_ad.lerp(ik_tmp.set(ik_f.x*0.45,1,ik_f.z*0.45).normalize(), sky).normalize();
   const reach=M.reach;
@@ -1445,7 +1534,7 @@ function applyAimIK(w, dt, sky){
   ik_bow.copy(ik_ad).multiplyScalar(Math.cos(drop)).addScaledVector(UPV,-Math.sin(drop)+AIMP.lift*S.raise).normalize().multiplyScalar(reach*(0.84+0.13*S.raise)).add(ik_bs);
   ik_bowFull.copy(ik_bs).addScaledVector(ik_ad, reach*0.97);
   // key positions of the draw hand
-  if (S.strRest && S.init) P.group.localToWorld(ik_nock.copy(S.strRest)); else ik_nock.copy(ik_bow).addScaledVector(ik_ad,-reach*0.2);
+  if (S.strRest && S.init) G.localToWorld(ik_nock.copy(S.strRest)); else ik_nock.copy(ik_bow).addScaledVector(ik_ad,-reach*0.2);
   ik_rest.copy(ik_nock).addScaledVector(UPV,-reach*0.06);
   ik_quiv.copy(ik_ds).addScaledVector(UPV, reach*0.42).addScaledVector(ik_f,-reach*0.38).addScaledVector(ik_r, reach*0.12);
   ik_tmp.copy(ik_ad); ik_tmp.y=0; ik_tmp.normalize();
@@ -1453,7 +1542,7 @@ function applyAimIK(w, dt, sky){
   ik_foll.copy(ik_anch).addScaledVector(ik_ad,-reach*0.4).addScaledVector(ik_l, reach*0.25).addScaledVector(UPV, reach*0.08);
   M.arrowLen = ik_anch.distanceTo(ik_bowFull)+0.12;
   // between shots of a volley the hand stays up by the ear, on its way back to the quiver
-  const chain = S.shots>0 && !!tgm && me.skyT<0;
+  const chain = S.shots>0 && !!tgm && st.skyT<0;
   ik_end.copy(ik_rest); if (chain) ik_end.copy(ik_foll).lerp(ik_quiv,0.55);
   if (x<0) ik_tgt.copy(ik_end);
   else if (x<K.anchor){
@@ -1463,11 +1552,11 @@ function applyAimIK(w, dt, sky){
   else if (x<K.rel) ik_tgt.copy(ik_anch);
   else hermitePath([[K.rel,ik_anch],[K.follow,ik_foll],[K.end,ik_end]], x, ik_tgt, 1.6);
   // --- springs in character space: no pops when a shot starts, ends, or the target moves ---
-  P.group.updateMatrixWorld(true);
-  if (!S.init){ S.init=true; B.rHand.getWorldPosition(S.bow.p); P.group.worldToLocal(S.bow.p); S.bow.v.set(0,0,0); B.lHand.getWorldPosition(S.draw.p); P.group.worldToLocal(S.draw.p); S.draw.v.set(0,0,0); }
-  spring3(S.bow, P.group.worldToLocal(ik_tmp.copy(ik_bow)), 17, dt);
-  spring3(S.draw, P.group.worldToLocal(ik_tmp.copy(ik_tgt)), x>=K.rel && x<K.follow ? 34 : 26, dt);
-  P.group.localToWorld(ik_tmp.copy(S.bow.p)); P.group.localToWorld(ik_tmp2.copy(S.draw.p));
+  G.updateMatrixWorld(true);
+  if (!S.init){ S.init=true; B.rHand.getWorldPosition(S.bow.p); G.worldToLocal(S.bow.p); S.bow.v.set(0,0,0); B.lHand.getWorldPosition(S.draw.p); G.worldToLocal(S.draw.p); S.draw.v.set(0,0,0); }
+  spring3(S.bow, G.worldToLocal(ik_tmp.copy(ik_bow)), 17, dt);
+  spring3(S.draw, G.worldToLocal(ik_tmp.copy(ik_tgt)), x>=K.rel && x<K.follow ? 34 : 26, dt);
+  G.localToWorld(ik_tmp.copy(S.bow.p)); G.localToWorld(ik_tmp2.copy(S.draw.p));
   solveArmIK(B.rArm, B.rFore, B.rHand, ik_tmp, IKV.a.set(0,-1,0).addScaledVector(ik_r,0.3), w);
   // --- bow hand: wrist straight, bow upright and facing the target. Most of the roll comes from the shoulder so the wrist does not twist ---
   if (M.bowL){
@@ -1496,11 +1585,11 @@ function applyAimIK(w, dt, sky){
 }
 // bowstring: two thin segments from the limb tips to the draw hand while it holds the string; it snaps back and hums after release
 const strTop=new T.Vector3(), strBot=new T.Vector3(), strMid=new T.Vector3(), strHand=new T.Vector3(), bowM=new T.Matrix4(), bowQ=new T.Quaternion(), bowD=new T.Quaternion();
-function updateBowString(dt){
-  const M=MODEL; if (!M.bowL) return;
+function updateBowString(M, dt){
+  if (!M.bowL) return;
   const S=M.sp, hm=M.B.rHand.matrixWorld, L=M.bowL;
   strTop.copy(L.top).applyMatrix4(hm); strBot.copy(L.bot).applyMatrix4(hm); strMid.copy(strTop).add(strBot).multiplyScalar(0.5);
-  if (S){ P.group.updateMatrixWorld(true); S.strRest=(S.strRest||new T.Vector3()).copy(strMid); P.group.worldToLocal(S.strRest); }
+  if (S){ M.group.updateMatrixWorld(true); S.strRest=(S.strRest||new T.Vector3()).copy(strMid); M.group.worldToLocal(S.strRest); }
   const g = S && S.grip && M.w.shoot>0.5 ? 1 : 0;
   for(let n=Math.max(1,Math.ceil(dt/0.004)), h=dt/n, i=0;i<n;i++){ L.gv += (g ? 900*(1-L.g)-60*L.gv : 2600*(0-L.g)-22*L.gv)*h; L.g += L.gv*h; if (g && L.g>1){ L.g=1; L.gv=0; } }
   L.g=Math.max(-0.35,Math.min(1,L.g));
@@ -1509,14 +1598,16 @@ function updateBowString(dt){
   put(L.s1, strTop, strMid); put(L.s2, strBot, strMid);
 }
 
-// ---------- Tripo character model (GLB): toon shading, blended locomotion, timed archery ----------
-const MODEL={ ready:false };
+// ---------- Tripo character model: one loaded template, cloned into an avatar for the local player and for every other player ----------
+const ARCH={ ready:false };            // template: processed scene + clips + bow frame
+const MODEL={ ready:false };           // the local player's avatar
 const _mv=new T.Vector3();
+const strGeo=new T.CylinderGeometry(0.009,0.009,1,5).rotateX(Math.PI/2).translate(0,0,0.5), strMat=new T.MeshBasicMaterial({color:'#3a2a1c'});
 function loadArcherModel(){
   if (!T.GLTFLoader) return;
   addLog('กำลังโหลดโมเดลตัวละคร…','sys');
   new T.GLTFLoader().load('elf_archer.gltf.json', g=>{
-    const S=2.4, root=g.scene; root.scale.setScalar(S);
+    const root=g.scene; root.scale.setScalar(2.4);
     let skinned=null;
     root.traverse(o=>{ if (o.isMesh){
       const m=o.material;
@@ -1528,74 +1619,336 @@ function loadArcherModel(){
       const om=new T.MeshBasicMaterial({ color:'#2b1d18', side:T.BackSide, skinning:true });
       om.onBeforeCompile=sh=>{ sh.vertexShader=sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\n  transformed += normal * 0.0055;'); };
       const ol=new T.SkinnedMesh(skinned.geometry, om); ol.bind(skinned.skeleton, skinned.bindMatrix);
-      ol.position.copy(skinned.position); ol.quaternion.copy(skinned.quaternion); ol.scale.copy(skinned.scale); ol.frustumCulled=false;
+      ol.position.copy(skinned.position); ol.quaternion.copy(skinned.quaternion); ol.scale.copy(skinned.scale); ol.frustumCulled=false; ol.name='outline';
       skinned.parent.add(ol);
     }
-    const mixer=new T.AnimationMixer(root);
     const find=k=>g.animations.find(a=>a.name.toLowerCase().indexOf(k)===0);
-    const mk=(clip,loop)=>{ if(!clip) return null; const a=mixer.clipAction(clip); a.setLoop(loop?T.LoopRepeat:T.LoopOnce,Infinity); a.clampWhenFinished=true; a.enabled=true; a.setEffectiveWeight(0); a.play(); return a; };
-    const A={ idle:mk(find('idle'),true), walk:mk(find('walk'),true), run:mk(find('run'),true), shoot:mk(find('archer'),true) };
-    if (!A.idle || !A.walk || !A.run){ addLog('โมเดลไม่มีท่าที่ต้องใช้ ใช้ตัวละครเดิมแทน','bad'); return; }
-    A.walk.timeScale=0; A.run.timeScale=0; if (A.shoot) A.shoot.timeScale=0;
-    const bone=n=>root.getObjectByName(n);
-    const B={ spine:bone('mixamorigSpine'), spine1:bone('mixamorigSpine1'), spine2:bone('mixamorigSpine2'), neck:bone('mixamorigNeck'), head:bone('mixamorigHead'),
-      lArm:bone('mixamorigLeftArm'), lFore:bone('mixamorigLeftForeArm'), lHand:bone('mixamorigLeftHand'), rArm:bone('mixamorigRightArm'), rFore:bone('mixamorigRightForeArm'), rHand:bone('mixamorigRightHand') };
-    root.updateMatrixWorld(true);
-    const wp=o=>o.getWorldPosition(new T.Vector3());
-    const reach=(B.rArm&&B.rFore&&B.rHand) ? wp(B.rArm).distanceTo(wp(B.rFore))+wp(B.rFore).distanceTo(wp(B.rHand)) : 0;
-    let bowL=null;
-    const ex3=g.parser && g.parser.json && g.parser.json.extras;
-    if (skinned && B.rHand && ex3 && ex3.bowTop){
-      const bi=skinned.skeleton.bones.indexOf(B.rHand), toL=new T.Matrix4().multiplyMatrices(skinned.skeleton.boneInverses[bi], skinned.bindMatrix);
+    const clips={ idle:find('idle'), walk:find('walk'), run:find('run') };
+    if (!clips.idle || !clips.walk || !clips.run){ addLog('โมเดลไม่มีท่าที่ต้องใช้ ใช้ตัวละครเดิมแทน','bad'); return; }
+    // bow frame in the bow-hand bone's local space (from the bind pose)
+    let bow=null; const ex3=g.parser && g.parser.json && g.parser.json.extras, rHand=root.getObjectByName('mixamorigRightHand');
+    if (skinned && rHand && ex3 && ex3.bowTop){
+      const bi=skinned.skeleton.bones.indexOf(rHand), toL=new T.Matrix4().multiplyMatrices(skinned.skeleton.boneInverses[bi], skinned.bindMatrix);
       const top=new T.Vector3().fromArray(ex3.bowTop).applyMatrix4(toL), bot=new T.Vector3().fromArray(ex3.bowBottom).applyMatrix4(toL), grip=new T.Vector3().fromArray(ex3.bowGrip).applyMatrix4(toL);
       const mid=top.clone().add(bot).multiplyScalar(0.5), axis=top.clone().sub(bot).normalize(), belly=grip.clone().sub(mid); belly.addScaledVector(axis,-belly.dot(axis)).normalize();
       const qL=new T.Quaternion().setFromRotationMatrix(new T.Matrix4().makeBasis(belly, axis, belly.clone().cross(axis)));
-      const sg=new T.CylinderGeometry(0.009,0.009,1,5).rotateX(Math.PI/2).translate(0,0,0.5), sm=new T.MeshBasicMaterial({color:'#3a2a1c'});
-      const s1=new T.Mesh(sg,sm), s2=new T.Mesh(sg,sm); s1.frustumCulled=s2.frustumCulled=false; scene.add(s1); scene.add(s2);
-      bowL={ top, bot, grip, qInv:qL.clone().invert(), s1, s2, g:0, gv:0 };
+      bow={ top, bot, grip, qInv:qL.clone().invert() };
     }
-    Object.assign(MODEL,{ bowL, root, mixer, A, S, B: Object.values(B).every(Boolean)?B:null, reach, rh:bone('mixamorigLeftHand'), spine:bone('mixamorigSpine1'), spine2:bone('mixamorigSpine2'), hips:bone('mixamorigHips'),
-      w:{idle:1,walk:0,run:0,shoot:0}, phase:0, move:0, runK:0, arrow:makeArrow(), deadR:0 });
-    MODEL.arrow.visible=false; scene.add(MODEL.arrow);
-    P.hips.visible=false; P.group.add(root);
-    me.maxSpd=3.4; MODEL.ready=true;
-    addLog('ใส่โมเดลนักธนูจาก Tripo แล้ว','good');
+    Object.assign(ARCH,{ scene:root, clips, bow, used:false, ready:true });
+    const av=makeAvatar(P.group);
+    if (!av){ addLog('โหลดโมเดลไม่สำเร็จ ใช้ตัวละครเดิมแทน','bad'); return; }
+    Object.assign(MODEL, av, { ready:true });
+    P.hips.visible=false; me.maxSpd=3.4;
+    addLog('โหลดตัวละครนักธนูแล้ว','good');
   }, undefined, ()=>addLog('โหลดโมเดลไม่สำเร็จ ใช้ตัวละครเดิมแทน','bad'));
 }
-function animateModel(dt, speed, aiming){
-  const M=MODEL, A=M.A;
+// builds one animated character under `group` (a group placed at the feet and turned to face `st.ang`)
+function makeAvatar(group){
+  if (!ARCH.ready) return null;
+  let root;
+  if (T.SkeletonUtils) root=T.SkeletonUtils.clone(ARCH.scene);
+  else if (!ARCH.used){ root=ARCH.scene; ARCH.used=true; }      // no cloning support: only the local player gets the model
+  else return null;
+  const mixer=new T.AnimationMixer(root);
+  const mk=clip=>{ const a=mixer.clipAction(clip); a.setLoop(T.LoopRepeat,Infinity); a.enabled=true; a.setEffectiveWeight(0); a.play(); return a; };
+  const A={ idle:mk(ARCH.clips.idle), walk:mk(ARCH.clips.walk), run:mk(ARCH.clips.run) };
+  A.walk.timeScale=0; A.run.timeScale=0;
+  const bone=n=>root.getObjectByName(n);
+  const B={ spine:bone('mixamorigSpine'), spine1:bone('mixamorigSpine1'), spine2:bone('mixamorigSpine2'), neck:bone('mixamorigNeck'), head:bone('mixamorigHead'),
+    lArm:bone('mixamorigLeftArm'), lFore:bone('mixamorigLeftForeArm'), lHand:bone('mixamorigLeftHand'), rArm:bone('mixamorigRightArm'), rFore:bone('mixamorigRightForeArm'), rHand:bone('mixamorigRightHand') };
+  if (!Object.values(B).every(Boolean)) return null;
+  group.add(root); root.updateMatrixWorld(true);
+  const wp=o=>o.getWorldPosition(new T.Vector3());
+  const reach=wp(B.rArm).distanceTo(wp(B.rFore))+wp(B.rFore).distanceTo(wp(B.rHand));
+  let bowL=null;
+  if (ARCH.bow){ const s1=new T.Mesh(strGeo,strMat), s2=new T.Mesh(strGeo,strMat); s1.frustumCulled=s2.frustumCulled=false; scene.add(s1); scene.add(s2);
+    bowL={ top:ARCH.bow.top, bot:ARCH.bow.bot, grip:ARCH.bow.grip, qInv:ARCH.bow.qInv, s1, s2, g:0, gv:0 }; }
+  const arrow=makeArrow(); arrow.visible=false; scene.add(arrow);
+  return { group, root, mixer, A, B, bowL, reach, rh:B.lHand, spine:B.spine1, arrow, arrowLen:0,
+    w:{idle:1,walk:0,run:0,shoot:0}, phase:Math.random(), move:0, runK:0, deadR:0, wv:0, sp:null,
+    st:{ atkT:-1, skyT:-1, ang:0, aim:null, dead:false, wSky:0, turnV:0, acc:0 } };
+}
+function disposeAvatar(M){
+  if (!M) return;
+  if (M.bowL){ scene.remove(M.bowL.s1); scene.remove(M.bowL.s2); }
+  scene.remove(M.arrow); M.mixer.stopAllAction(); M.mixer.uncacheRoot(M.root);
+  if (M.root.parent) M.root.parent.remove(M.root);
+  M.root.traverse(o=>{ if (o.isSkinnedMesh && o.skeleton && o.skeleton.boneTexture){ o.skeleton.boneTexture.dispose(); } });
+}
+function animateModel(M, dt, speed, aiming){
+  const A=M.A, st=M.st;
   // locomotion weights: idle -> walk -> run
   M.move += ((speed>0.12?Math.min(1,speed/0.9):0) - M.move)*ex(10,dt);
   M.runK += (Math.max(0,Math.min(1,(speed-1.6)/1.2)) - M.runK)*ex(8,dt);
-  // walk and run share one phase, advanced by distance travelled so the feet stay planted
-  // play the clips near their natural tempo: walk feels right at ~1.8 u/s, run at ~4 u/s
+  // walk and run share one phase; the clips play near their natural tempo: walk feels right at ~1.8 u/s, run at ~4 u/s
   const walkRate=(1/A.walk.getClip().duration)*Math.max(0.6,Math.min(1.25,speed/1.6));
   const runRate=(1/A.run.getClip().duration)*Math.max(0.75,Math.min(1.15,speed/3.4));
   if (speed>0.05) M.phase = (M.phase + dt*(walkRate+(runRate-walkRate)*M.runK)) % 1;
   A.walk.time=M.phase*A.walk.getClip().duration; A.run.time=M.phase*A.run.getClip().duration;
-  const wantShoot = (aiming || me.skyT>=0) ? 1 : 0;
+  const wantShoot = (aiming || st.skyT>=0) ? 1 : 0;
   { const tgtW=wantShoot*(1-M.move*0.9), om=wantShoot?13:10; const wv0=M.wv||0; M.wv=wv0+(om*om*(tgtW-M.w.shoot)-2*om*wv0)*dt; M.w.shoot=Math.min(1,Math.max(0,M.w.shoot+M.wv*dt)); if (M.w.shoot===0||M.w.shoot===1) M.wv=0; }
   const aimW=M.w.shoot;
   M.w.idle=(1-M.move)*(1-aimW)+aimW; M.w.walk=M.move*(1-M.runK)*(1-aimW); M.w.run=M.move*M.runK*(1-aimW);
   for (const k of ['idle','walk','run']) A[k].setEffectiveWeight(M.w[k]);
-  if (A.shoot) A.shoot.setEffectiveWeight(0);
   M.mixer.update(dt);
-  applyAimIK(aimW, dt, anim.wSky||0);
+  applyAimIK(M, aimW, dt);
   // additive touches on top of the clips
-  const wSky=anim.wSky||0;
-  if (M.spine) M.spine.rotation.z += Math.max(-0.15,Math.min(0.15,-anim.turnV*0.03))*M.move;
-  if (M.spine) M.spine.rotation.x += Math.max(-0.12,Math.min(0.12,(anim.acc||0)*0.01))*M.move;
-  M.deadR += ((me.dead?1:0)-M.deadR)*ex(6,dt);
+  M.spine.rotation.z += Math.max(-0.15,Math.min(0.15,-(st.turnV||0)*0.03))*M.move;
+  M.spine.rotation.x += Math.max(-0.12,Math.min(0.12,(st.acc||0)*0.01))*M.move;
+  M.deadR += ((st.dead?1:0)-M.deadR)*ex(6,dt);
   M.root.rotation.x=-M.deadR*1.45; M.root.position.y=M.deadR*0.25 - 0.035*(M.sp?M.sp.d:0)*aimW;
-  M.root.updateMatrixWorld(true); updateBowString(dt);
+  M.root.updateMatrixWorld(true); updateBowString(M, dt);
+}
+// copies the local player's game state into its avatar before animating it
+function syncLocalSt(){
+  const st=MODEL.st; st.atkT=me.atkT; st.skyT=me.skyT; st.ang=me.ang; st.dead=me.dead; st.wSky=anim.wSky||0; st.turnV=anim.turnV; st.acc=anim.acc||0;
+  const tg = me.atkT>=0 && me.atkTarget && !me.atkTarget.dead ? me.atkTarget : (me.target && !me.target.dead ? me.target : null);
+  st.aim = tg ? tg.group.position : null;
 }
 function arrowOrigin(v){ if (MODEL.ready && MODEL.rh){ MODEL.root.updateMatrixWorld(true); MODEL.rh.getWorldPosition(v); } else P.nockArrow.getWorldPosition(v); return v; }
+
+// ---------- accounts, character creation and seeing other players (Supabase auth + realtime) ----------
+// Same Supabase project as the other amberlegend.com games: one account for all of them. This game keeps its data under
+// user_metadata.mmo and uses realtime channels named "mmo:map:<id>", so nothing here touches the other games' tables.
+const SB_URL='https://spkzkwksjweszytkgokx.supabase.co';
+const SB_KEY='sb_publishable_FsTybeBpKC_v3gHQ4gnUHA_xhYmbBIt';     // publishable key: safe to ship in the page
+const MEMST={};
+const SafeStore={ getItem:k=>{ try{ return localStorage.getItem(k); }catch(e){ return MEMST[k]??null; } },
+  setItem:(k,v)=>{ try{ localStorage.setItem(k,v); }catch(e){ MEMST[k]=v; } }, removeItem:k=>{ try{ localStorage.removeItem(k); }catch(e){ delete MEMST[k]; } } };
+const NP={ sb:null, user:null, char:null, mode:'none', ch:null, sid:null, live:false, remotes:new Map(), sendT:0, hbT:0, last:null, force:true, saveT:20, dirty:false, inWorld:false };
+const GATE={ open:true };
+const CLASSES={ archer:{ name:'นักธนู' } };
+const wTimeout=(p,ms)=>Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),ms))]);
+const cleanName=n=>String(n==null?'':n).replace(/[\u0000-\u001f<>]/g,'').trim().slice(0,12) || 'นักผจญภัย';
+function gateShow(step){ ['gLoading','gLogin','gChar','gSelect'].forEach(id=>{ $(id).hidden = id!==step; }); $('gate').hidden=false; GATE.open=true; }
+function gateHide(){ $('gate').hidden=true; GATE.open=false; }
+function gateErr(id,msg){ const el=$(id); el.textContent=msg||''; el.hidden=!msg; }
+function gateBusy(on){ document.querySelectorAll('#gate button').forEach(b=>{ b.disabled=on; }); }
+const AUTH_ERR=e=>{ const m=String((e&&(e.message||e.error_description))||e||'');
+  if (/anonymous/i.test(m)) return 'ระบบผู้เยี่ยมชมยังไม่เปิดบนเซิร์ฟเวอร์';
+  if (/rate|too many/i.test(m)) return 'มีคนเข้าพร้อมกันมากเกินไป รอสักครู่แล้วลองใหม่';
+  if (/identity.*(exist|linked)/i.test(m)) return 'บัญชี Google นี้ผูกกับบัญชีอื่นอยู่แล้ว';
+  return 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ลองใหม่อีกครั้ง หรือเล่นแบบออฟไลน์'; };
+
+async function gateInit(){
+  gateShow('gLoading');
+  try{
+    if (!window.supabase) throw new Error('no client');
+    NP.sb=window.supabase.createClient(SB_URL,SB_KEY,{ auth:{ storage:SafeStore, persistSession:true, autoRefreshToken:true, detectSessionInUrl:true }, realtime:{ params:{ eventsPerSecond:20 } } });
+    const {data,error}=await wTimeout(NP.sb.auth.getSession(),12000);
+    if (error){ try{ await NP.sb.auth.signOut({scope:'local'}); }catch(e){} }
+    NP.user=(!error && data && data.session && data.session.user) || null;
+  }catch(e){ NP.user=null; NP.netErr=true; }
+  if (NP.user){ NP.mode='online'; afterLogin(); }
+  else { gateShow('gLogin'); gateErr('gErr', NP.netErr ? 'ตอนนี้ต่อเซิร์ฟเวอร์ไม่ได้ เล่นแบบออฟไลน์ได้ แต่จะไม่เห็นผู้เล่นคนอื่น' : ''); }
+}
+function loadChar(){
+  let c=null;
+  if (NP.mode==='online') c=NP.user && NP.user.user_metadata && NP.user.user_metadata.mmo;
+  else { try{ c=JSON.parse(SafeStore.getItem('mmo_offline_char')||'null'); }catch(e){} }
+  if (!c || typeof c.name!=='string' || !CLASSES[c.cls]) return null;
+  return { v:1, name:cleanName(c.name), cls:c.cls, lv:Math.max(1,Math.min(99,c.lv|0||1)), exp:Math.max(0,c.exp|0), map:MAPS[c.map|0]?c.map|0:0 };
+}
+async function saveChar(wait){
+  const c=NP.char; if (!c) return;
+  if (NP.inWorld){ c.lv=me.lv; c.exp=me.exp; c.map=MAP.id; }
+  NP.dirty=false;
+  if (NP.mode==='online'){ const p=NP.sb.auth.updateUser({ data:{ mmo:c } }); if (wait){ const r=await wTimeout(p,12000); if (r.error) throw r.error; NP.user=r.data.user||NP.user; } else p.catch(()=>{}); }
+  else SafeStore.setItem('mmo_offline_char', JSON.stringify(c));
+}
+function afterLogin(){
+  NP.char=loadChar();
+  if (NP.char) showSelect(); else { $('charName').value=''; gateErr('gCharErr',''); gateShow('gChar'); setTimeout(()=>{ try{ $('charName').focus(); }catch(e){} },50); }
+}
+function showSelect(){
+  const c=NP.char, inW=NP.inWorld;
+  $('selName').textContent=c.name; $('selInfo').textContent=`${CLASSES[c.cls].name} · Lv.${inW?me.lv:c.lv} · ${MAPS[inW?MAP.id:c.map].name}`;
+  const anon = NP.mode==='online' && NP.user && NP.user.is_anonymous;
+  $('selAcct').textContent = NP.mode!=='online' ? 'โหมดออฟไลน์: ตัวละครเก็บในเครื่องนี้ และจะไม่เห็นผู้เล่นคนอื่น' : anon ? 'บัญชีผู้เยี่ยมชม: ตัวละครผูกกับเบราว์เซอร์นี้ ผูก Google เพื่อเล่นได้ทุกเครื่อง' : `บัญชี Google${NP.user.email?': '+NP.user.email:''}`;
+  $('btnLink').hidden=!anon; $('btnLogout').textContent = NP.mode==='online' ? 'ออกจากระบบ' : 'กลับหน้าเข้าสู่ระบบ';
+  $('btnEnter').textContent = inW ? 'กลับเข้าเกม' : 'เข้าสู่โลก'; $('btnDelete').dataset.arm=''; $('btnDelete').textContent='ลบตัวละคร';
+  gateErr('gSelErr',''); gateShow('gSelect');
+}
+function enterWorld(){
+  const c=NP.char;
+  if (!NP.inWorld){
+    me.lv=c.lv; me.exp=c.exp; me.maxHp=520+45*(c.lv-1); me.maxSp=220+18*(c.lv-1); me.hp=me.maxHp; me.sp=me.maxSp;
+    $('whoName').textContent=c.name; myPlate.textContent=c.name;
+    NP.inWorld=true;
+    if (c.map!==MAP.id){ loadMap(c.map); updateCamera(0,true); } else netJoin(MAP.id);
+    addLog(`ยินดีต้อนรับ ${c.name}`,'sys');
+    if (NP.mode!=='online') addLog('โหมดออฟไลน์: ไม่เห็นผู้เล่นคนอื่น','bad');
+  }
+  gateHide(); setNetBadge();
+}
+$('btnGuest').addEventListener('click', async ()=>{
+  if (!NP.sb){ gateErr('gErr', AUTH_ERR()); return; }
+  gateBusy(true); gateErr('gErr','');
+  try{ const r=await wTimeout(NP.sb.auth.signInAnonymously(),12000); if (r.error) throw r.error; NP.user=r.data.user; NP.mode='online'; afterLogin(); }
+  catch(e){ gateErr('gErr', AUTH_ERR(e)); }
+  gateBusy(false);
+});
+const oauthBack=()=>location.origin+location.pathname;
+$('btnGoogle').addEventListener('click', async ()=>{
+  if (!NP.sb){ gateErr('gErr', AUTH_ERR()); return; }
+  gateBusy(true); gateErr('gErr','');
+  try{ const r=await NP.sb.auth.signInWithOAuth({ provider:'google', options:{ redirectTo:oauthBack(), queryParams:{ prompt:'select_account' } } }); if (r.error) throw r.error; }
+  catch(e){ gateErr('gErr', AUTH_ERR(e)); gateBusy(false); }
+});
+$('btnOffline').addEventListener('click', ()=>{ NP.mode='offline'; NP.user=null; afterLogin(); });
+$('btnLink').addEventListener('click', async ()=>{
+  gateBusy(true); gateErr('gSelErr','');
+  try{ await saveChar(true); const r=await NP.sb.auth.linkIdentity({ provider:'google', options:{ redirectTo:oauthBack() } }); if (r.error) throw r.error; }
+  catch(e){ gateErr('gSelErr', AUTH_ERR(e)); gateBusy(false); }
+});
+$('charForm').addEventListener('submit', async ev=>{
+  ev.preventDefault();
+  const name=$('charName').value.replace(/\s+/g,' ').trim();
+  if ([...name].length<2 || [...name].length>12 || /[<>]/.test(name)){ gateErr('gCharErr','ชื่อต้องยาว 2–12 ตัวอักษร'); return; }
+  gateBusy(true); gateErr('gCharErr','');
+  NP.char={ v:1, name, cls:'archer', lv:1, exp:0, map:0 };
+  try{ await saveChar(true); enterWorld(); }
+  catch(e){ NP.char=null; gateErr('gCharErr', AUTH_ERR(e)); }
+  gateBusy(false);
+});
+$('btnEnter').addEventListener('click', enterWorld);
+$('btnLogout').addEventListener('click', async ()=>{
+  gateBusy(true);
+  if (NP.inWorld){ try{ await saveChar(true); }catch(e){} }
+  netLeave(); NP.inWorld=false;
+  if (NP.mode==='online'){ try{ await NP.sb.auth.signOut({scope:'local'}); }catch(e){} }
+  NP.user=null; NP.char=null; NP.mode='none'; gateBusy(false); gateErr('gErr',''); gateShow('gLogin'); setNetBadge();
+});
+$('btnDelete').addEventListener('click', async ()=>{
+  const b=$('btnDelete');
+  if (!b.dataset.arm){ b.dataset.arm='1'; b.textContent='กดอีกครั้งเพื่อยืนยันการลบ'; return; }
+  gateBusy(true); netLeave(); NP.inWorld=false;
+  try{ if (NP.mode==='online'){ const r=await wTimeout(NP.sb.auth.updateUser({ data:{ mmo:null } }),12000); if (r.error) throw r.error; NP.user=r.data.user||NP.user; } else SafeStore.removeItem('mmo_offline_char');
+    NP.char=null; afterLogin(); }
+  catch(e){ gateErr('gSelErr', AUTH_ERR(e)); }
+  gateBusy(false);
+});
+$('btnAccount').addEventListener('click', ()=>{ if (NP.char) showSelect(); });
+document.addEventListener('visibilitychange', ()=>{ if (document.visibilityState==='hidden' && NP.dirty && NP.inWorld) saveChar(false); });
+
+// ----- realtime: one channel per map; presence says who is here, broadcast carries movement and attacks -----
+function setNetBadge(){
+  $('mmHint').textContent = 'แผนที่โลก (M)' + (NP.mode==='online' ? (NP.live ? ` · ผู้เล่นในแมพ ${NP.remotes.size+1}` : ' · กำลังเชื่อมต่อ…') : NP.mode==='offline' ? ' · ออฟไลน์' : '');
+}
+function netJoin(mapId){
+  netLeave();
+  if (NP.mode!=='online' || !NP.sb || !NP.inWorld) return;
+  NP.sid = NP.sid || (String(NP.user.id).slice(0,8)+'-'+Math.random().toString(36).slice(2,8));
+  const ch=NP.sb.channel('mmo:map:'+mapId, { config:{ broadcast:{ self:false, ack:false }, presence:{ key:NP.sid } } });
+  ch.on('presence',{event:'sync'}, ()=>{ if (NP.ch===ch) netPresence(ch); })
+    .on('presence',{event:'join'}, ()=>{ NP.force=true; })
+    .on('broadcast',{event:'s'}, m=>{ if (NP.ch===ch) netState(m.payload); })
+    .on('broadcast',{event:'e'}, m=>{ if (NP.ch===ch) netEvent(m.payload); })
+    .subscribe(status=>{ if (NP.ch!==ch) return;
+      if (status==='SUBSCRIBED'){ NP.live=true; NP.force=true; ch.track({ n:NP.char.name, c:NP.char.cls, lv:me.lv }); }
+      else if (status==='CHANNEL_ERROR' || status==='TIMED_OUT' || status==='CLOSED') NP.live=false;
+      setNetBadge(); });
+  NP.ch=ch; setNetBadge();
+}
+function netLeave(){
+  const ch=NP.ch; NP.ch=null; NP.live=false; NP.last=null;
+  if (ch){ try{ NP.sb.removeChannel(ch); }catch(e){} }
+  for (const R of NP.remotes.values()) removeRemote(R); NP.remotes.clear();
+  ghosts.forEach(g=>scene.remove(g.g)); ghosts.length=0;
+}
+function getRemote(id){
+  let R=NP.remotes.get(id); if (R) return R;
+  const group=new T.Group(); group.visible=false; scene.add(group); addShadow(group,0.45);
+  const plate=document.createElement('div'); plate.className='np other'; plate.hidden=true; ui.appendChild(plate);
+  R={ id, group, plate, av:null, name:'', lv:1, pos:new T.Vector3(), tx:0, tz:0, ang:0, ta:0, spd:0, aimOn:false, dead:false, aimPt:new T.Vector3(), first:true, rel:true, skyRel:true, rainAt:new T.Vector3() };
+  NP.remotes.set(id,R); return R;
+}
+function removeRemote(R){ disposeAvatar(R.av); scene.remove(R.group); R.plate.remove(); }
+function netPresence(ch){
+  const stt=ch.presenceState(), seen=new Set();
+  for (const key in stt){ if (key===NP.sid) continue; const meta=(stt[key]&&stt[key][0])||{}; seen.add(key);
+    const R=getRemote(key); R.name=cleanName(meta.n); R.lv=Math.max(1,meta.lv|0); R.plate.textContent=`${R.name} Lv.${R.lv}`; }
+  for (const [k,R] of NP.remotes) if (!seen.has(k)){ removeRemote(R); NP.remotes.delete(k); }
+  NP.force=true; setNetBadge();
+}
+const num=v=>(typeof v==='number' && isFinite(v)) ? v : 0;
+function netState(p){
+  if (!p || typeof p.i!=='string' || p.i===NP.sid || !Array.isArray(p.s) || !NP.remotes.has(p.i)) return;   // only players the presence list knows about
+  const R=NP.remotes.get(p.i), s=p.s;
+  R.tx=Math.max(-34,Math.min(46,num(s[0]))); R.tz=Math.max(-22,Math.min(22,num(s[1]))); R.ta=num(s[2]);
+  R.aimOn=!!(s[4]&1); R.dead=!!(s[4]&2);
+  if (R.aimOn){ const ax=num(s[5]), az=num(s[6]); R.aimPt.set(ax, groundY(ax,az), az); }
+  if (s[7] && (s[7]|0)!==R.lv){ R.lv=Math.max(1,s[7]|0); R.plate.textContent=`${R.name} Lv.${R.lv}`; }
+  if (R.first){ R.first=false; R.pos.set(R.tx,0,R.tz); R.ang=R.ta; }
+}
+function netEvent(p){
+  if (!p || typeof p.i!=='string' || p.i===NP.sid || !NP.remotes.has(p.i)) return;
+  const R=NP.remotes.get(p.i); if (!R.av || R.first) return;
+  const x=Math.max(-40,Math.min(52,num(p.x))), z=Math.max(-28,Math.min(28,num(p.z)));
+  if (p.k==='atk'){ R.aimPt.set(x, groundY(x,z), z); R.aimOn=true; R.av.st.atkT=0; R.av.st.skyT=-1; R.rel=false; }
+  else if (p.k==='sky'){ R.rainAt.set(x, groundY(x,z), z); R.ta=Math.atan2(x-R.pos.x, z-R.pos.z); R.av.st.skyT=0; R.av.st.atkT=-1; R.skyRel=false; ring(R.rainAt,'#bfe3ff',0.3,3.3,0.9,0.7); }
+}
+function netEvt(kind,x,z){ if (NP.live && NP.ch) NP.ch.send({ type:'broadcast', event:'e', payload:{ i:NP.sid, k:kind, x:+x.toFixed(1), z:+z.toFixed(1) } }); }
+function netTick(dt){
+  if (NP.inWorld){ NP.saveT-=dt; if (NP.dirty && NP.saveT<=0){ NP.saveT=30; saveChar(false); } }
+  if (!NP.live || !NP.ch) return;
+  NP.sendT-=dt; NP.hbT-=dt; if (NP.sendT>0) return;
+  const aimP = me.atkT>=0 && me.atkTarget && !me.atkTarget.dead ? me.atkTarget.group.position : (me.target && !me.target.dead ? me.target.group.position : null);
+  const moving = me.spd>0.3;
+  const cur=[ +me.pos.x.toFixed(2), +me.pos.z.toFixed(2), +me.ang.toFixed(2), +me.spd.toFixed(1), (aimP && !moving ? 1:0)|(me.dead?2:0), aimP? +aimP.x.toFixed(1):0, aimP? +aimP.z.toFixed(1):0, me.lv ];
+  const changed = !NP.last || cur.some((v,i)=>v!==NP.last[i]);
+  if (NP.force || changed || NP.hbT<=0){
+    NP.ch.send({ type:'broadcast', event:'s', payload:{ i:NP.sid, s:cur } });
+    NP.last=cur; NP.sendT=0.15; NP.hbT=2.5; NP.force=false;
+  }
+}
+// other players' arrows: for show only, damage is decided on each player's own screen
+const ghosts=[];
+function ghostArrow(R){
+  const a=makeArrow(); R.av.rh.getWorldPosition(a.position); if (R.av.arrowLen) a.scale.z=R.av.arrowLen/0.72; scene.add(a);
+  ghosts.push({ g:a, dest:R.aimPt.clone().add(new T.Vector3(0,0.85,0)), t:0 });
+}
+function ghostVolley(R){
+  const at=R.rainAt.clone(), up=makeArrow(); R.av.rh.getWorldPosition(up.position); scene.add(up);
+  drops.push({ g:up, vel:new T.Vector3(0,26,0), gy:1e9, stuck:0, life:0.45 });
+  const mapAt=MAP.id;
+  for(let i=0;i<22;i++) setTimeout(()=>{ if (MAP.id!==mapAt) return;
+    const a=makeArrow(), r=Math.sqrt(Math.random())*3.1, ang=Math.random()*6.28, gx=at.x+Math.cos(ang)*r, gz=at.z+Math.sin(ang)*r, gy=groundY(gx,gz);
+    a.position.set(gx-1.2, gy+9.4, gz-0.6); scene.add(a);
+    drops.push({ g:a, vel:new T.Vector3(1.2,-9,0.6).multiplyScalar(2.2), gy, stuck:0, life:-1 });
+  }, 260+i*28);
+}
+function updateRemotes(dt){
+  for (const R of NP.remotes.values()){
+    if (!R.av && ARCH.ready && !R.noModel){ R.av=makeAvatar(R.group);
+      if (!R.av){ R.noModel=true; const m=new T.Mesh(new T.ConeGeometry(0.45,1.9,10), toon('#3f8f92')); m.position.y=0.95; m.castShadow=true; R.group.add(m); } }
+    if (R.first){ R.group.visible=false; continue; }
+    const k=ex(10,dt), px=R.pos.x, pz=R.pos.z;
+    R.pos.x+=(R.tx-px)*k; R.pos.z+=(R.tz-pz)*k;
+    const sp=Math.hypot(R.pos.x-px,R.pos.z-pz)/Math.max(dt,1e-3); R.spd+=(Math.min(sp,6)-R.spd)*ex(8,dt);
+    R.ang=angLerp(R.ang,R.ta,ex(12,dt));
+    R.group.position.set(R.pos.x, groundY(R.pos.x,R.pos.z), R.pos.z); R.group.rotation.y=R.ang; R.group.visible=true;
+    if (!R.av) continue;
+    const st=R.av.st;
+    if (st.atkT>=0){ st.atkT+=dt; if (!R.rel && st.atkT>=SHOT.rel){ R.rel=true; ghostArrow(R); } if (st.atkT>=SHOT.end) st.atkT=-1; }
+    if (st.skyT>=0){ st.skyT+=dt; if (!R.skyRel && st.skyT>=SKYSHOT.rel){ R.skyRel=true; ghostVolley(R); } if (st.skyT>=SKYSHOT.end) st.skyT=-1; }
+    st.wSky += ((st.skyT>=0 && st.skyT<0.75 ? 1:0)-st.wSky)*ex(12,dt);
+    const aiming = (R.aimOn || st.atkT>=0) && R.spd<0.8;
+    st.ang=R.ang; st.dead=R.dead; st.aim = aiming ? R.aimPt : null;
+    animateModel(R.av, dt, R.spd, aiming);
+  }
+  for (let i=ghosts.length-1;i>=0;i--){
+    const f=ghosts[i]; f.t+=dt; const d=f.g.position.distanceTo(f.dest);
+    if (d<0.4 || f.t>2){ spark(f.dest,'#fff1c4',6,2.2,0.35,0.3); scene.remove(f.g); ghosts.splice(i,1); continue; }
+    f.g.lookAt(f.dest); f.g.position.addScaledVector(tv.copy(f.dest).sub(f.g.position).normalize(), Math.min(d,32*dt));
+  }
+}
 
 // ---------- HUD ----------
 const _v=new T.Vector3();
 function toScreen(p){ _v.copy(p).project(cam); return { x:(_v.x*0.5+0.5)*innerWidth, y:(-_v.y*0.5+0.5)*innerHeight, on:_v.z<1 }; }
 const plate=document.createElement('div'); plate.className='np'; plate.innerHTML='<span></span><em><u></u></em>'; ui.appendChild(plate);
-const myPlate=document.createElement('div'); myPlate.className='np me'; myPlate.textContent='เอลวิน'; ui.appendChild(myPlate);
+const myPlate=document.createElement('div'); myPlate.className='np me'; myPlate.textContent='นักผจญภัย'; ui.appendChild(myPlate);
 let lastHud={};
 function setTxt(el,key,val){ if(lastHud[key]!==val){ lastHud[key]=val; el.textContent=val; } }
 function updateHUD(dt){
@@ -1616,6 +1969,7 @@ function updateHUD(dt){
   } else plate.hidden=true;
   const ms=toScreen(P.group.position.clone().add(new T.Vector3(0,-0.15,0)));
   myPlate.style.left=ms.x+'px'; myPlate.style.top=(ms.y+22)+'px';
+  for (const R of NP.remotes.values()){ const on=R.group.visible; if (on){ const rs=toScreen(_mv.copy(R.group.position).setY(R.group.position.y-0.15)); R.plate.hidden=!rs.on; R.plate.style.left=rs.x+'px'; R.plate.style.top=(rs.y+22)+'px'; } else R.plate.hidden=true; }
   for(let i=floaters.length-1;i>=0;i--){
     const f=floaters[i]; f.t+=dt; if (f.t>1.1){ f.d.remove(); floaters.splice(i,1); continue; }
     const s=toScreen(f.p); f.d.style.left=(s.x+f.dx*f.t)+'px'; f.d.style.top=(s.y-f.t*55)+'px'; f.d.style.opacity=String(Math.min(1,(1.1-f.t)*3));
@@ -1647,6 +2001,7 @@ const toMM=(x,z)=>[(x-MX0)/(MX1-MX0)*mm.width, (z-MZ0)/(MZ1-MZ0)*mm.height];
 function drawMinimap(){
   mctx.drawImage(mmBase,0,0);
   for(const p of PORTALS){ const [x,y]=toMM(p.x,p.z); mctx.fillStyle='#bff4ff'; mctx.strokeStyle='#1d4a5a'; mctx.lineWidth=1.5; mctx.beginPath(); mctx.arc(x,y,3.6,0,6.28); mctx.fill(); mctx.stroke(); }
+  for(const R of NP.remotes.values()){ if (R.first) continue; const [x,y]=toMM(R.pos.x,R.pos.z); mctx.fillStyle='#7fd0ff'; mctx.strokeStyle='#12323f'; mctx.lineWidth=1; mctx.beginPath(); mctx.arc(x,y,3,0,6.28); mctx.fill(); mctx.stroke(); }
   for(const m of monsters){ if(m.dead) continue; const [x,y]=toMM(m.pos.x,m.pos.z); mctx.fillStyle=m.aggro?'#ff5a3a':'#f0a050'; mctx.beginPath(); mctx.arc(x,y,2.2,0,6.28); mctx.fill(); }
   const [px,py]=toMM(me.pos.x,me.pos.z);
   mctx.save(); mctx.translate(px,py); mctx.rotate(-me.ang+Math.PI);
@@ -1680,17 +2035,18 @@ function closeWorldMap(){ $('worldmap').hidden=true; }
 $('mapbox').addEventListener('click', openWorldMap);
 $('wmClose').addEventListener('click', closeWorldMap);
 $('worldmap').addEventListener('click', e=>{ if (e.target.id==='worldmap') closeWorldMap(); });
-addEventListener('keydown', e=>{ if (e.key==='m' || e.key==='M'){ $('worldmap').hidden ? openWorldMap() : closeWorldMap(); } else if (e.key==='Escape') closeWorldMap(); });
+addEventListener('keydown', e=>{ if (GATE.open) return; if (e.key==='m' || e.key==='M'){ $('worldmap').hidden ? openWorldMap() : closeWorldMap(); } else if (e.key==='Escape') closeWorldMap(); });
 
 [vcMat,rockMat,shadowMat,grassMat,outlineMat,hitMat].forEach(m=>SHARED_MAT.add(m)); [shadowGeo,hitGeo].forEach(g=>SHARED_GEO.add(g));
 loadMap(0);
-updatePlayer(0,0); updateCamera(0,true); loadArcherModel();
+updatePlayer(0,0); updateCamera(0,true); loadArcherModel(); gateInit();
 function tick(now){
   if (window.__paused){ last=now; requestAnimationFrame(tick); return; }
   const dt=Math.max(0,Math.min(0.05,(now-last)/1000)); last=now; t+=dt; timeU.value=t;
   updatePlayer(dt,t); updateMonsters(dt,t); updateFx(dt); updateCamera(dt);
   for(const s of sway){ s.o.rotation.z=Math.sin(t*0.9+s.ph)*s.amp; s.o.rotation.x=Math.cos(t*0.7+s.ph)*s.amp*0.6; }
-  updateParticles(dt,t); animatePortals(dt,t); checkWarps();
+  updateParticles(dt,t); animatePortals(dt,t); if (!GATE.open) checkWarps();
+  updateRemotes(dt); netTick(dt);
   waterTex.offset.x=t*0.012; waterTex.offset.y=t*0.006;
   sun.position.copy(P.group.position).add(SUNOFF); sun.target.position.copy(P.group.position);
   renderer.render(scene,cam);
@@ -1700,7 +2056,7 @@ function tick(now){
   requestAnimationFrame(tick);
 }
 requestAnimationFrame(tick);
-window.__g={AIMP,step:(dt)=>{ t+=dt; timeU.value=t; updatePlayer(dt,t); },loadMap,MAPS,get MAP(){return MAP;},get PORTALS(){return PORTALS;},MODEL,me,P,anim,monsters,cam,setZoom:z=>{zoom=z;},moveToGround,findPath,walkable,obstacles};
+window.__g={NP,GATE,ARCH,enterWorld,AIMP,step:(dt)=>{ t+=dt; timeU.value=t; updatePlayer(dt,t); },loadMap,MAPS,get MAP(){return MAP;},get PORTALS(){return PORTALS;},MODEL,me,P,anim,monsters,cam,setZoom:z=>{zoom=z;},moveToGround,findPath,walkable,obstacles};
 })();
 </script>
 
