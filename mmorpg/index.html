@@ -1352,6 +1352,7 @@ function stepToward(pos, tx, tz, speed, dt){
 }
 function angLerp(a,b,t){ let d=b-a; while(d>Math.PI) d-=Math.PI*2; while(d<-Math.PI) d+=Math.PI*2; return a+d*t; }
 
+const ATK_RANGE=9;
 function updatePlayer(dt, t){
   if (me.dead){
     me.deadT+=dt;
@@ -1366,15 +1367,16 @@ function updatePlayer(dt, t){
   const tg=me.target && !me.target.dead ? me.target : null;
   if (tg){
     const tp=tg.group.position, d=Math.hypot(tp.x-me.pos.x, tp.z-me.pos.z);
-    if (d>9 && me.atkT<0){ me.chaseT=(me.chaseT||0)-dt; if (!me.path || me.chaseT<=0){ me.path=findPath(me.pos.x,me.pos.z,tp.x,tp.z); me.chaseT=0.5; } moveTo = me.path && me.path.length ? me.path[0] : tp; if (me.path && me.path.length && Math.hypot(me.path[0].x-me.pos.x, me.path[0].z-me.pos.z)<0.3) me.path.shift(); }
+    // out of range: run in until comfortably inside it (not just to the edge), so a wandering target does not cause a stop-start shuffle
+    if (me.atkT<0 && (d>ATK_RANGE || (me.chasing && d>ATK_RANGE-2))){ me.chasing=true; me.chaseT=(me.chaseT||0)-dt; if (!me.path || me.chaseT<=0){ me.path=findPath(me.pos.x,me.pos.z,tp.x,tp.z); me.chaseT=0.5; } moveTo = me.path && me.path.length ? me.path[0] : tp; if (me.path && me.path.length && Math.hypot(me.path[0].x-me.pos.x, me.path[0].z-me.pos.z)<0.3) me.path.shift(); }
     else {
-      aiming=true; face=Math.atan2(tp.x-me.pos.x, tp.z-me.pos.z);
+      me.chasing=false; aiming=true; face=Math.atan2(tp.x-me.pos.x, tp.z-me.pos.z);
       if (me.atkT<0 && me.skyT<0 && me.castCd<=0 && me.spd<0.8 && (!MODEL.ready || MODEL.w.shoot>0.55)){
         if (me.sp>=4){ me.sp-=4; me.atkT=0; me.released=false; me.atkTarget=tg; me.combatT=4; netEvt('atk', tg.group.position.x, tg.group.position.z); }
         else if (me.spWarn<=0){ addLog('SP ไม่พอสำหรับยิงธนู','bad'); me.spWarn=3; }
       }
     }
-  } else if (me.dest && me.path && me.path.length) moveTo=me.path[0];
+  } else { me.chasing=false; if (me.dest && me.path && me.path.length) moveTo=me.path[0]; }
   if (moveTo && me.atkT>=0 && !tg) me.atkT=-1;
   if (me.atkT>=0){
     me.atkT+=dt; aiming=true; if (window.__atkHold!==undefined){ me.atkT=window.__atkHold; me.released=true; }
