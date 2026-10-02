@@ -274,7 +274,7 @@ addEventListener('resize', resize); resize();
 const sun = new T.DirectionalLight('#ffe1ad', 0.72); sun.position.set(-18,30,14); scene.add(sun); scene.add(sun.target);
 renderer.shadowMap.enabled=true; renderer.shadowMap.type=T.PCFSoftShadowMap;
 sun.castShadow=true; sun.shadow.mapSize.set(2048,2048);
-{ const sc=sun.shadow.camera; sc.left=-15; sc.right=15; sc.top=15; sc.bottom=-15; sc.near=1; sc.far=90; }
+{ const sc=sun.shadow.camera; sc.left=-26; sc.right=26; sc.top=26; sc.bottom=-26; sc.near=1; sc.far=110; }
 sun.shadow.bias=-0.0005; sun.shadow.normalBias=0.04;
 const SUNOFF=new T.Vector3(-18,30,14).normalize().multiplyScalar(40);
 
@@ -476,7 +476,7 @@ function drawState(){
   // pull 0..1, follow-through 0..1, grip (hand on string)
   let pull=0, follow=0, grip=false;
   const ph=(T0,T1,TR,x)=>{ if(x<0) return; if (x>=T0 && x<TR){ pull=ease(Math.min(1,(x-T0)/(T1-T0))); grip=true; } else if (x>=TR) follow=Math.sin(Math.min(1,(x-TR)/0.32)*Math.PI); };
-  ph(0.12,0.46,0.5,me.atkT); ph(0.05,0.32,0.36,me.skyT);
+  ph(0.38,0.62,0.70,me.atkT); ph(0.05,0.32,0.36,me.skyT);
   return {pull,follow,grip};
 }
 function animateArcher(dt,t,speed,aiming){
@@ -1017,7 +1017,7 @@ function loadMap(id, arriveDir){
   START={ x:-2, z:2 };
   buildPortals();
   const pal=M.pal; SKY.set(pal.sky); scene.background=SKY; scene.fog.color.copy(SKY);
-  scene.fog.near = M.id===1||M.id===9||M.id===7 ? 26 : 38; scene.fog.far = M.id===1||M.id===9||M.id===7 ? 66 : 80;
+  FOG0.near = M.id===1||M.id===9||M.id===7 ? 26 : 38; FOG0.far = M.id===1||M.id===9||M.id===7 ? 66 : 80;
   hemi.color.set(pal.hemi[0]); hemi.groundColor.set(pal.hemi[1]); hemi.intensity=pal.hemi[2];
   sun.color.set(pal.sun[0]); sun.intensity=pal.sun[1];
   buildTerrain();
@@ -1083,7 +1083,7 @@ targetRing.visible=false; scene.add(targetRing);
 const flying=[], drops=[];
 function fireArrow(tg){
   if (!tg || tg.dead) return;
-  const a=makeArrow(); arrowOrigin(a.position); scene.add(a);
+  const a=makeArrow(); arrowOrigin(a.position); if (MODEL.ready && MODEL.arrowLen) a.scale.z=MODEL.arrowLen/0.72; scene.add(a);
   flying.push({ g:a, tg, t:0, trail:0 });
 }
 function skyVolley(){
@@ -1193,8 +1193,8 @@ canvas.addEventListener('pointermove', ev=>{
   const h=pick(ev); hovered=h.mon&&!h.mon.dead?h.mon:null; hoverGround=h.ground; canvas.style.cursor=hovered?'crosshair':'pointer';
   if (holding && h.ground && holdT<=0 && !me.dead){ holdT=0.18; moveToGround(h.ground.x, h.ground.z, true); }
 });
-let zoom=1;
-canvas.addEventListener('wheel', ev=>{ ev.preventDefault(); zoom=Math.min(1.45,Math.max(0.65,zoom+ev.deltaY*0.0012)); }, {passive:false});
+let zoom=1.5;
+canvas.addEventListener('wheel', ev=>{ ev.preventDefault(); zoom=Math.min(2.4,Math.max(0.9,zoom+ev.deltaY*0.0015)); }, {passive:false});
 addEventListener('keydown', ev=>{
   if (ev.key==='2') arrowRain();
   else if (ev.key==='3') potion();
@@ -1232,7 +1232,7 @@ function updatePlayer(dt, t){
     if (d>9 && me.atkT<0){ me.chaseT=(me.chaseT||0)-dt; if (!me.path || me.chaseT<=0){ me.path=findPath(me.pos.x,me.pos.z,tp.x,tp.z); me.chaseT=0.5; } moveTo = me.path && me.path.length ? me.path[0] : tp; if (me.path && me.path.length && Math.hypot(me.path[0].x-me.pos.x, me.path[0].z-me.pos.z)<0.3) me.path.shift(); }
     else {
       aiming=true; face=Math.atan2(tp.x-me.pos.x, tp.z-me.pos.z);
-      if (me.atkT<0 && me.skyT<0 && me.castCd<=0 && me.spd<0.8){
+      if (me.atkT<0 && me.skyT<0 && me.castCd<=0 && me.spd<0.8 && (!MODEL.ready || MODEL.w.shoot>0.55)){
         if (me.sp>=4){ me.sp-=4; me.atkT=0; me.released=false; me.atkTarget=tg; me.combatT=4; }
         else if (me.spWarn<=0){ addLog('SP ไม่พอสำหรับยิงธนู','bad'); me.spWarn=3; }
       }
@@ -1240,10 +1240,10 @@ function updatePlayer(dt, t){
   } else if (me.dest && me.path && me.path.length) moveTo=me.path[0];
   if (moveTo && me.atkT>=0 && !tg) me.atkT=-1;
   if (me.atkT>=0){
-    me.atkT+=dt; aiming=true;
+    me.atkT+=dt; aiming=true; if (window.__atkHold!==undefined){ me.atkT=window.__atkHold; me.released=true; }
     if (me.atkTarget && !me.atkTarget.dead) face=Math.atan2(me.atkTarget.group.position.x-me.pos.x, me.atkTarget.group.position.z-me.pos.z);
-    if (!me.released && me.atkT>=0.5){ me.released=true; anim.strV=-6; fireArrow(me.atkTarget); }
-    if (me.atkT>=0.92){ me.atkT=-1; me.castCd=0.06; }
+    if (!me.released && me.atkT>=SHOT.rel){ me.released=true; anim.strV=-6; fireArrow(me.atkTarget); }
+    if (me.atkT>=SHOT.end){ me.atkT=-1; me.castCd=0.04; }
   }
   if (me.skyT>=0){
     me.skyT+=dt; face=me.rainFace;
@@ -1313,7 +1313,7 @@ function updateFx(dt){
     const dest=tg.group.position.clone().add(new T.Vector3(0,0.85,0));
     const d=f.g.position.distanceTo(dest);
     if (tg.dead || d<0.4 || f.t>2){
-      if (!tg.dead){ hit(tg, 24+Math.random()*14+me.lv*3); spark(dest,'#fff1c4',8,2.5,0.4,0.35); }
+      if (!tg.dead){ hit(tg, 27+Math.random()*15+me.lv*3.3); spark(dest,'#fff1c4',8,2.5,0.4,0.35); }
       scene.remove(f.g); flying.splice(i,1); continue;
     }
     f.g.lookAt(dest);
@@ -1345,7 +1345,9 @@ function updateFx(dt){
 }
 
 const camPos=new T.Vector3(), look=new T.Vector3();
+const FOG0={near:38, far:80};
 function updateCamera(dt, snap){
+  { const add=(zoom-1)*23.4; scene.fog.near=FOG0.near+add; scene.fog.far=FOG0.far+add*1.6; }
   if (window.__camOv){ const o=window.__camOv(P.group.position, me.ang); cam.position.copy(o[0]); cam.lookAt(o[1]); return; }
   const o=new T.Vector3(0,17.5,15.5).multiplyScalar(zoom);
   const tgt=P.group.position.clone().add(o);
@@ -1380,32 +1382,131 @@ function solveArmIK(up, fore, hand, target, pole, w){
   const tgt=IKV.tg.clone();
   aimBoneAt(up, fore, IKV.el, w); aimBoneAt(fore, hand, tgt, w);
 }
-const ik_f=new T.Vector3(), ik_l=new T.Vector3(), ik_r=new T.Vector3(), ik_ad=new T.Vector3(), ik_lt=new T.Vector3(), ik_rt=new T.Vector3(), ik_p1=new T.Vector3(), ik_p2=new T.Vector3(), ik_ls=new T.Vector3(), ik_rs=new T.Vector3(), ik_aimAt=new T.Vector3();
-function applyAimIK(w, pull, follow, sky){
-  const M=MODEL, B=M.B; if (!B || w<0.001) return;
-  M.root.updateMatrixWorld(true);
+// Shot timeline (seconds into the attack). The draw hand travels rest -> quiver -> nock -> anchor -> follow-through -> rest.
+const SHOT={ quiver:0.19, nock:0.38, anchor:0.62, rel:0.70, follow:0.88, end:1.15 };
+const SKYSHOT={ quiver:-1, nock:0.07, anchor:0.30, rel:0.36, follow:0.52, end:0.9 };
+// full-draw pose, in world units: the draw hand anchors beside/behind the ear on the draw side
+const AIMP={ stance:0.8, up:0.08, lat:0.40, back:0.10, cant:0.3, lift:0.12 };
+const sm01=k=>{ k=Math.min(1,Math.max(0,k)); return k*k*(3-2*k); };
+function spring3(s, target, omega, dt){
+  const n=dt>0.02?3:1, h=dt/n;
+  for(let i=0;i<n;i++){
+    s.v.x+=(omega*omega*(target.x-s.p.x)-2*omega*s.v.x)*h; s.v.y+=(omega*omega*(target.y-s.p.y)-2*omega*s.v.y)*h; s.v.z+=(omega*omega*(target.z-s.p.z)-2*omega*s.v.z)*h;
+    s.p.addScaledVector(s.v,h);
+  }
+}
+const ik_f=new T.Vector3(), ik_l=new T.Vector3(), ik_r=new T.Vector3(), ik_ad=new T.Vector3(), ik_bs=new T.Vector3(), ik_ds=new T.Vector3(), ik_aimAt=new T.Vector3(), ik_side=new T.Vector3(),
+      ik_bow=new T.Vector3(), ik_bowFull=new T.Vector3(), ik_rest=new T.Vector3(), ik_quiv=new T.Vector3(), ik_nock=new T.Vector3(), ik_anch=new T.Vector3(), ik_foll=new T.Vector3(), ik_tgt=new T.Vector3(), ik_tmp=new T.Vector3(), ik_tmp2=new T.Vector3();
+const hm0=new T.Vector3(), hm1=new T.Vector3(), ik_end=new T.Vector3();
+// cubic Hermite through timed keys [[t,pos],...]; interior tangents are Catmull-Rom, the ends rest (startBoost launches the first segment)
+function hermitePath(keys, x, out, startBoost){
+  let i=0; while (i<keys.length-2 && x>=keys[i+1][0]) i++;
+  const k0=keys[i], k1=keys[i+1], h=k1[0]-k0[0], u=Math.min(1,Math.max(0,(x-k0[0])/h));
+  const tan=(n,v)=>{ if (n===0){ if (startBoost) v.copy(keys[1][1]).sub(keys[0][1]).multiplyScalar(startBoost/(keys[1][0]-keys[0][0])); else v.set(0,0,0); }
+    else if (n===keys.length-1) v.set(0,0,0);
+    else v.copy(keys[n+1][1]).sub(keys[n-1][1]).multiplyScalar(1/(keys[n+1][0]-keys[n-1][0])); return v; };
+  tan(i,hm0); tan(i+1,hm1);
+  const u2=u*u, u3=u2*u;
+  out.copy(k0[1]).multiplyScalar(2*u3-3*u2+1).addScaledVector(hm0,(u3-2*u2+u)*h).addScaledVector(k1[1],-2*u3+3*u2).addScaledVector(hm1,(u3-u2)*h);
+  return out;
+}
+function applyAimIK(w, dt, sky){
+  const M=MODEL, B=M.B; if (!B) return;
+  const S=M.sp || (M.sp={ bow:{p:new T.Vector3(),v:new T.Vector3()}, draw:{p:new T.Vector3(),v:new T.Vector3()}, init:false, d:0, raise:0.6, kick:0, relDone:false, shots:0 });
+  if (w<0.001){ S.init=false; S.d=0; S.kick=0; S.shots=0; S.grip=false; M.arrow.visible=false; M.root.rotation.y=0; return; }
+  const x = me.atkT>=0 ? me.atkT : (me.skyT>=0 ? me.skyT : -1), K = me.atkT>=0 ? SHOT : SKYSHOT;
+  // --- body: side-on stance from the feet up, a little extra twist and lean as the string comes back ---
+  const dT = x<0 ? 0 : x<K.nock ? 0 : x<K.anchor ? sm01((x-K.nock)/(K.anchor-K.nock)) : x<K.rel ? 1 : 1-sm01((x-K.rel)/(K.end-K.rel));
+  S.d += (dT-S.d)*ex(16,dt);
+  S.kick *= Math.exp(-8*dt);
+  if (x>=0 && x>=K.rel && !S.relDone){ S.relDone=true; S.kick=1; S.shots++; S.bow.v.addScaledVector(UPV,-4.5*M.reach).add(ik_tmp.set(0,0,2.5*M.reach)); S.draw.v.multiplyScalar(0.3); }
+  if (x<K.rel) S.relDone=false;
+  const we=w*w*(3-2*w), stance=AIMP.stance*we;
+  M.root.rotation.y=stance; M.root.updateMatrixWorld(true);
   ik_f.set(Math.sin(me.ang),0,Math.cos(me.ang)); ik_l.set(Math.cos(me.ang),0,-Math.sin(me.ang)); ik_r.copy(ik_l).negate();
-  // turn the body side-on (left shoulder toward the target), keep the head looking at it
-  const tw=0.62*w;   // the bow is in the right hand: right shoulder turns toward the target
-  [B.spine,B.spine1,B.spine2].forEach(b=>b && twistBone(b, UPV, tw/3));
-  if (B.neck) twistBone(B.neck, UPV, -tw*0.5);
-  if (B.head) twistBone(B.head, UPV, -tw*0.45);
-  if (sky>0.001 && B.spine2){ IKV.c.copy(ik_f).cross(UPV).normalize(); twistBone(B.spine2, IKV.c, -0.35*sky); }
-  // aim direction from the bow shoulder to the target's chest (or the sky)
-  B.rArm.getWorldPosition(ik_ls); B.lArm.getWorldPosition(ik_rs);   // ik_ls = bow shoulder, ik_rs = draw shoulder
-  if (me.atkTarget && !me.atkTarget.dead && me.atkT>=0) ik_aimAt.copy(me.atkTarget.group.position).add(new T.Vector3(0,0.9,0));
-  else if (me.target && !me.target.dead) ik_aimAt.copy(me.target.group.position).add(new T.Vector3(0,0.9,0));
-  else ik_aimAt.copy(ik_ls).addScaledVector(ik_f,5);
-  ik_ad.copy(ik_aimAt).sub(ik_ls); ik_ad.y*=0.5; ik_ad.normalize();
-  if (sky>0.001){ ik_ad.lerp(new T.Vector3(ik_f.x*0.45,1,ik_f.z*0.45).normalize(), sky).normalize(); }
+  const tw=(0.14+0.16*S.d-0.07*S.kick)*w;
+  [B.spine,B.spine1,B.spine2].forEach(b=>twistBone(b, UPV, tw/3));
+  const back=(stance+tw);
+  twistBone(B.neck, UPV, -back*0.5); twistBone(B.head, UPV, -back*0.46);
+  ik_side.copy(ik_f).cross(UPV).normalize();
+  twistBone(B.spine1, ik_side, (-0.07*S.d+0.06*S.kick-0.35*sky)*w);
+  twistBone(B.head, ik_side, (0.05*S.d-0.05*S.kick)*w);
+  // --- aim frame ---
+  B.rArm.getWorldPosition(ik_bs); B.lArm.getWorldPosition(ik_ds);     // bow shoulder (right), draw shoulder (left)
+  const tgm = me.atkT>=0 && me.atkTarget && !me.atkTarget.dead ? me.atkTarget : (me.target && !me.target.dead ? me.target : null);
+  if (tgm) ik_aimAt.copy(tgm.group.position).add(ik_tmp.set(0,0.9,0)); else ik_aimAt.copy(ik_bs).addScaledVector(ik_f,5);
+  ik_ad.copy(ik_aimAt).sub(ik_bs); ik_ad.y*=0.5; ik_ad.normalize();
+  if (sky>0.001) ik_ad.lerp(ik_tmp.set(ik_f.x*0.45,1,ik_f.z*0.45).normalize(), sky).normalize();
   const reach=M.reach;
-  ik_lt.copy(ik_ls).addScaledVector(ik_ad, reach*0.97);
-  // draw hand: from the string at the bow to just under the right cheek
-  ik_p1.copy(ik_lt).addScaledVector(ik_ad,-reach*0.22);
-  ik_p2.copy(ik_rs).addScaledVector(ik_ad, reach*0.12).addScaledVector(UPV, reach*0.18).addScaledVector(ik_r, reach*0.1);
-  ik_rt.copy(ik_p1).lerp(ik_p2, pull).addScaledVector(ik_ad,-reach*0.25*follow).addScaledVector(ik_l, reach*0.15*follow);
-  solveArmIK(B.rArm, B.rFore, B.rHand, ik_lt, IKV.a.set(0,-1,0).addScaledVector(ik_r,0.3), w);
-  solveArmIK(B.lArm, B.lFore, B.lHand, ik_rt, IKV.b.copy(ik_l).addScaledVector(UPV,0.5).addScaledVector(ik_ad,-0.6), w);
+  // bow arm: held a little low between shots, comes up to the line of aim as the string is drawn
+  const rT = x<0 ? 0.66 : x<K.nock ? 0.66-0.12*sm01(x/Math.max(0.01,K.nock)) : x<K.anchor ? 0.54+0.46*sm01((x-K.nock)/(K.anchor-K.nock)) : x<K.rel ? 1 : 1-0.34*sm01((x-K.rel-0.08)/(K.end-K.rel-0.08));
+  S.raise += (rT-S.raise)*ex(18,dt);
+  const drop=(1-S.raise)*0.6;
+  ik_bow.copy(ik_ad).multiplyScalar(Math.cos(drop)).addScaledVector(UPV,-Math.sin(drop)+AIMP.lift*S.raise).normalize().multiplyScalar(reach*(0.84+0.13*S.raise)).add(ik_bs);
+  ik_bowFull.copy(ik_bs).addScaledVector(ik_ad, reach*0.97);
+  // key positions of the draw hand
+  if (S.strRest && S.init) P.group.localToWorld(ik_nock.copy(S.strRest)); else ik_nock.copy(ik_bow).addScaledVector(ik_ad,-reach*0.2);
+  ik_rest.copy(ik_nock).addScaledVector(UPV,-reach*0.06);
+  ik_quiv.copy(ik_ds).addScaledVector(UPV, reach*0.42).addScaledVector(ik_f,-reach*0.38).addScaledVector(ik_r, reach*0.12);
+  ik_tmp.copy(ik_ad); ik_tmp.y=0; ik_tmp.normalize();
+  B.head.getWorldPosition(ik_anch); ik_anch.addScaledVector(UPV, AIMP.up).addScaledVector(ik_l, AIMP.lat).addScaledVector(ik_tmp, -AIMP.back);
+  ik_foll.copy(ik_anch).addScaledVector(ik_ad,-reach*0.4).addScaledVector(ik_l, reach*0.25).addScaledVector(UPV, reach*0.08);
+  M.arrowLen = ik_anch.distanceTo(ik_bowFull)+0.12;
+  // between shots of a volley the hand stays up by the ear, on its way back to the quiver
+  const chain = S.shots>0 && !!tgm && me.skyT<0;
+  ik_end.copy(ik_rest); if (chain) ik_end.copy(ik_foll).lerp(ik_quiv,0.55);
+  if (x<0) ik_tgt.copy(ik_end);
+  else if (x<K.anchor){
+    const keys = K.quiver>0 ? [[0,ik_end],[K.quiver,ik_quiv],[K.nock,ik_nock],[K.anchor,ik_anch]] : [[0,ik_end],[K.nock,ik_nock],[K.anchor,ik_anch]];
+    hermitePath(keys, x, ik_tgt, 0);
+  }
+  else if (x<K.rel) ik_tgt.copy(ik_anch);
+  else hermitePath([[K.rel,ik_anch],[K.follow,ik_foll],[K.end,ik_end]], x, ik_tgt, 1.6);
+  // --- springs in character space: no pops when a shot starts, ends, or the target moves ---
+  P.group.updateMatrixWorld(true);
+  if (!S.init){ S.init=true; B.rHand.getWorldPosition(S.bow.p); P.group.worldToLocal(S.bow.p); S.bow.v.set(0,0,0); B.lHand.getWorldPosition(S.draw.p); P.group.worldToLocal(S.draw.p); S.draw.v.set(0,0,0); }
+  spring3(S.bow, P.group.worldToLocal(ik_tmp.copy(ik_bow)), 17, dt);
+  spring3(S.draw, P.group.worldToLocal(ik_tmp.copy(ik_tgt)), x>=K.rel && x<K.follow ? 34 : 26, dt);
+  P.group.localToWorld(ik_tmp.copy(S.bow.p)); P.group.localToWorld(ik_tmp2.copy(S.draw.p));
+  solveArmIK(B.rArm, B.rFore, B.rHand, ik_tmp, IKV.a.set(0,-1,0).addScaledVector(ik_r,0.3), w);
+  // --- bow hand: wrist straight, bow upright and facing the target. Most of the roll comes from the shoulder so the wrist does not twist ---
+  if (M.bowL){
+    const k=we*S.raise;
+    B.rFore.getWorldPosition(ik_rest); B.rHand.getWorldPosition(ik_quiv); const ax=ik_quiv.sub(ik_rest).normalize();   // forearm axis (scratch vectors reused)
+    const up2=ik_foll.copy(UPV).addScaledVector(ik_l,AIMP.cant); up2.addScaledVector(ax,-up2.dot(ax)).normalize();
+    bowM.makeBasis(ax, up2, ik_tmp.copy(ax).cross(up2)); bowQ.setFromRotationMatrix(bowM).multiply(M.bowL.qInv);        // desired world rotation of the hand bone
+    B.rHand.getWorldQuaternion(IKV.q2); bowD.copy(bowQ).multiply(IKV.q2.invert());
+    const pr=bowD.x*ax.x+bowD.y*ax.y+bowD.z*ax.z, tw2=2*Math.atan2(pr, bowD.w), roll=Math.atan2(Math.sin(tw2),Math.cos(tw2));
+    twistBone(B.rArm, ax, roll*k);
+    B.rHand.parent.getWorldQuaternion(IKV.q3).invert(); IKV.q3.multiply(bowQ);
+    B.rHand.quaternion.slerp(IKV.q3, k); B.rHand.updateMatrixWorld(true);
+  }
+  solveArmIK(B.lArm, B.lFore, B.lHand, ik_tmp2, IKV.b.copy(ik_l).multiplyScalar(0.5).addScaledVector(UPV,0.35).addScaledVector(ik_ad,-1.0), w);
+  // --- arrow: pulled from the quiver, set on the string, gone at release ---
+  const has = x>=0 && x<K.rel && x>=(K.quiver>0 ? K.quiver : 0.03);
+  S.grip = x>=K.nock && x<K.rel;
+  M.arrow.visible=has;
+  if (has){
+    B.lHand.getWorldPosition(M.arrow.position);
+    if (M.bowL) ik_tmp.copy(M.bowL.grip).applyMatrix4(B.rHand.matrixWorld); else B.rHand.getWorldPosition(ik_tmp);
+    const nk = sm01((x-(K.quiver>0?K.quiver:0))/(K.nock-(K.quiver>0?K.quiver:0)));
+    ik_tmp2.copy(M.arrow.position).addScaledVector(UPV,1).addScaledVector(ik_f,0.4).lerp(ik_tmp, nk);
+    M.arrow.lookAt(ik_tmp2); M.arrow.scale.set(1,1,M.arrowLen/0.72);
+  }
+}
+// bowstring: two thin segments from the limb tips to the draw hand while it holds the string; it snaps back and hums after release
+const strTop=new T.Vector3(), strBot=new T.Vector3(), strMid=new T.Vector3(), strHand=new T.Vector3(), bowM=new T.Matrix4(), bowQ=new T.Quaternion(), bowD=new T.Quaternion();
+function updateBowString(dt){
+  const M=MODEL; if (!M.bowL) return;
+  const S=M.sp, hm=M.B.rHand.matrixWorld, L=M.bowL;
+  strTop.copy(L.top).applyMatrix4(hm); strBot.copy(L.bot).applyMatrix4(hm); strMid.copy(strTop).add(strBot).multiplyScalar(0.5);
+  if (S){ P.group.updateMatrixWorld(true); S.strRest=(S.strRest||new T.Vector3()).copy(strMid); P.group.worldToLocal(S.strRest); }
+  const g = S && S.grip && M.w.shoot>0.5 ? 1 : 0;
+  for(let n=Math.max(1,Math.ceil(dt/0.004)), h=dt/n, i=0;i<n;i++){ L.gv += (g ? 900*(1-L.g)-60*L.gv : 2600*(0-L.g)-22*L.gv)*h; L.g += L.gv*h; if (g && L.g>1){ L.g=1; L.gv=0; } }
+  L.g=Math.max(-0.35,Math.min(1,L.g));
+  if (Math.abs(L.g)>0.001){ M.B.lHand.getWorldPosition(strHand); strMid.lerp(strHand, L.g); }
+  const put=(mesh,a,b)=>{ mesh.position.copy(a); mesh.lookAt(b); mesh.scale.set(1,1,a.distanceTo(b)); };
+  put(L.s1, strTop, strMid); put(L.s2, strBot, strMid);
 }
 
 // ---------- Tripo character model (GLB): toon shading, blended locomotion, timed archery ----------
@@ -1442,7 +1543,18 @@ function loadArcherModel(){
     root.updateMatrixWorld(true);
     const wp=o=>o.getWorldPosition(new T.Vector3());
     const reach=(B.rArm&&B.rFore&&B.rHand) ? wp(B.rArm).distanceTo(wp(B.rFore))+wp(B.rFore).distanceTo(wp(B.rHand)) : 0;
-    Object.assign(MODEL,{ root, mixer, A, S, B: Object.values(B).every(Boolean)?B:null, reach, rh:bone('mixamorigLeftHand'), spine:bone('mixamorigSpine1'), spine2:bone('mixamorigSpine2'), hips:bone('mixamorigHips'),
+    let bowL=null;
+    const ex3=g.parser && g.parser.json && g.parser.json.extras;
+    if (skinned && B.rHand && ex3 && ex3.bowTop){
+      const bi=skinned.skeleton.bones.indexOf(B.rHand), toL=new T.Matrix4().multiplyMatrices(skinned.skeleton.boneInverses[bi], skinned.bindMatrix);
+      const top=new T.Vector3().fromArray(ex3.bowTop).applyMatrix4(toL), bot=new T.Vector3().fromArray(ex3.bowBottom).applyMatrix4(toL), grip=new T.Vector3().fromArray(ex3.bowGrip).applyMatrix4(toL);
+      const mid=top.clone().add(bot).multiplyScalar(0.5), axis=top.clone().sub(bot).normalize(), belly=grip.clone().sub(mid); belly.addScaledVector(axis,-belly.dot(axis)).normalize();
+      const qL=new T.Quaternion().setFromRotationMatrix(new T.Matrix4().makeBasis(belly, axis, belly.clone().cross(axis)));
+      const sg=new T.CylinderGeometry(0.009,0.009,1,5).rotateX(Math.PI/2).translate(0,0,0.5), sm=new T.MeshBasicMaterial({color:'#3a2a1c'});
+      const s1=new T.Mesh(sg,sm), s2=new T.Mesh(sg,sm); s1.frustumCulled=s2.frustumCulled=false; scene.add(s1); scene.add(s2);
+      bowL={ top, bot, grip, qInv:qL.clone().invert(), s1, s2, g:0, gv:0 };
+    }
+    Object.assign(MODEL,{ bowL, root, mixer, A, S, B: Object.values(B).every(Boolean)?B:null, reach, rh:bone('mixamorigLeftHand'), spine:bone('mixamorigSpine1'), spine2:bone('mixamorigSpine2'), hips:bone('mixamorigHips'),
       w:{idle:1,walk:0,run:0,shoot:0}, phase:0, move:0, runK:0, arrow:makeArrow(), deadR:0 });
     MODEL.arrow.visible=false; scene.add(MODEL.arrow);
     P.hips.visible=false; P.group.add(root);
@@ -1461,34 +1573,21 @@ function animateModel(dt, speed, aiming){
   const runRate=(1/A.run.getClip().duration)*Math.max(0.75,Math.min(1.15,speed/3.4));
   if (speed>0.05) M.phase = (M.phase + dt*(walkRate+(runRate-walkRate)*M.runK)) % 1;
   A.walk.time=M.phase*A.walk.getClip().duration; A.run.time=M.phase*A.run.getClip().duration;
-  // archery: hold the ready pose while aiming, scrub the clip so release lands on the arrow spawn
-  let st=0.35;
-  if (me.atkT>=0){ const x=me.atkT; st = x<0.5 ? 0.35+(x/0.5)*1.15 : 1.5+Math.min(1,(x-0.5)/0.42)*0.5; }
-  else if (me.skyT>=0){ const x=me.skyT; st = x<0.36 ? 0.35+(x/0.36)*1.15 : 1.5+Math.min(1,(x-0.36)/0.5)*0.5; }
-  const wantShoot = A.shoot && (aiming || me.skyT>=0) ? 1 : 0;
-  M.w.shoot += (wantShoot*(1-M.move*0.9) - M.w.shoot)*ex(10,dt);
+  const wantShoot = (aiming || me.skyT>=0) ? 1 : 0;
+  { const tgtW=wantShoot*(1-M.move*0.9), om=wantShoot?13:10; const wv0=M.wv||0; M.wv=wv0+(om*om*(tgtW-M.w.shoot)-2*om*wv0)*dt; M.w.shoot=Math.min(1,Math.max(0,M.w.shoot+M.wv*dt)); if (M.w.shoot===0||M.w.shoot===1) M.wv=0; }
   const aimW=M.w.shoot;
   M.w.idle=(1-M.move)*(1-aimW)+aimW; M.w.walk=M.move*(1-M.runK)*(1-aimW); M.w.run=M.move*M.runK*(1-aimW);
   for (const k of ['idle','walk','run']) A[k].setEffectiveWeight(M.w[k]);
   if (A.shoot) A.shoot.setEffectiveWeight(0);
   M.mixer.update(dt);
-  const Dm=drawState(); applyAimIK(aimW, Dm.pull, Dm.follow, anim.wSky||0);
+  applyAimIK(aimW, dt, anim.wSky||0);
   // additive touches on top of the clips
   const wSky=anim.wSky||0;
   if (M.spine) M.spine.rotation.z += Math.max(-0.15,Math.min(0.15,-anim.turnV*0.03))*M.move;
   if (M.spine) M.spine.rotation.x += Math.max(-0.12,Math.min(0.12,(anim.acc||0)*0.01))*M.move;
   M.deadR += ((me.dead?1:0)-M.deadR)*ex(6,dt);
-  M.root.rotation.x=-M.deadR*1.45; M.root.position.y=M.deadR*0.25;
-  // nocked arrow in the drawing hand
-  const drawing = (me.atkT>0.1 && me.atkT<0.5) || (me.skyT>0.05 && me.skyT<0.36);
-  M.arrow.visible=drawing && !!M.rh;
-  if (M.arrow.visible){
-    M.root.updateMatrixWorld(true); M.rh.getWorldPosition(M.arrow.position);
-    if (me.skyT>=0) _mv.copy(M.arrow.position).add(new T.Vector3(Math.sin(me.ang)*0.6,1,Math.cos(me.ang)*0.6));
-    else if (me.atkTarget && !me.atkTarget.dead) _mv.copy(me.atkTarget.group.position).add(new T.Vector3(0,0.9,0));
-    else _mv.copy(M.arrow.position).add(new T.Vector3(Math.sin(me.ang),0,Math.cos(me.ang)));
-    M.arrow.lookAt(_mv);
-  }
+  M.root.rotation.x=-M.deadR*1.45; M.root.position.y=M.deadR*0.25 - 0.035*(M.sp?M.sp.d:0)*aimW;
+  M.root.updateMatrixWorld(true); updateBowString(dt);
 }
 function arrowOrigin(v){ if (MODEL.ready && MODEL.rh){ MODEL.root.updateMatrixWorld(true); MODEL.rh.getWorldPosition(v); } else P.nockArrow.getWorldPosition(v); return v; }
 
@@ -1587,6 +1686,7 @@ addEventListener('keydown', e=>{ if (e.key==='m' || e.key==='M'){ $('worldmap').
 loadMap(0);
 updatePlayer(0,0); updateCamera(0,true); loadArcherModel();
 function tick(now){
+  if (window.__paused){ last=now; requestAnimationFrame(tick); return; }
   const dt=Math.max(0,Math.min(0.05,(now-last)/1000)); last=now; t+=dt; timeU.value=t;
   updatePlayer(dt,t); updateMonsters(dt,t); updateFx(dt); updateCamera(dt);
   for(const s of sway){ s.o.rotation.z=Math.sin(t*0.9+s.ph)*s.amp; s.o.rotation.x=Math.cos(t*0.7+s.ph)*s.amp*0.6; }
@@ -1600,7 +1700,7 @@ function tick(now){
   requestAnimationFrame(tick);
 }
 requestAnimationFrame(tick);
-window.__g={loadMap,MAPS,get MAP(){return MAP;},get PORTALS(){return PORTALS;},MODEL,me,P,anim,monsters,cam,setZoom:z=>{zoom=z;},moveToGround,findPath,walkable,obstacles};
+window.__g={AIMP,step:(dt)=>{ t+=dt; timeU.value=t; updatePlayer(dt,t); },loadMap,MAPS,get MAP(){return MAP;},get PORTALS(){return PORTALS;},MODEL,me,P,anim,monsters,cam,setZoom:z=>{zoom=z;},moveToGround,findPath,walkable,obstacles};
 })();
 </script>
 
